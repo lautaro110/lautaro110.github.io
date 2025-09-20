@@ -1,0 +1,48 @@
+
+/* ================== */
+/* LOGIN MODERNO      */
+/* ================== */
+
+.login-container {
+    max-width: 350px;
+    margin: 100px auto;
+    padding: 2rem;
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.login-container:hover {
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+}
+
+.login-container h1 {
+    margin-bottom: 1.5rem;
+    color: #004080;
+}
+
+.login-container input {
+    width: 80%;
+    padding: 0.65rem;
+    margin: 0.6rem 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.login-container input:focus {
+    border-color: #004080;
+    outline: none;
+}
+
+.login-container button {
+    width: 85%;
+}
+
+#mensajeError {
+    color: red;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}

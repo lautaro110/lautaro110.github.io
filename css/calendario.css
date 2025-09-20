@@ -1,0 +1,118 @@
+
+/* -------- CALENDARIO ESCOLAR -------- */
+.calendario-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.calendario-container h2 {
+    color: #004080;
+    margin-bottom: 1rem;
+}
+
+.calendario-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.calendario-form input,
+.calendario-form select {
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.calendario-form button {
+    width: fit-content;
+    padding: 0.6rem 1rem;
+    background-color: #004080;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.calendario-form button:hover {
+    background-color: #0066cc;
+}
+
+/* Tarjetas de eventos */
+.evento-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1rem;
+    border-radius: 8px;
+    color: #fff;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    position: relative;
+}
+
+.evento-card.titulo-feriado { background-color: #ff4d4d; }
+.evento-card.titulo-no-clases { background-color: #ffa500; }
+.evento-card.titulo-evento { background-color: #3399ff; }
+
+.evento-card button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    background-color: rgba(0,0,0,0.2);
+}
+
+.evento-card button:hover {
+    background-color: rgba(0,0,0,0.4);
+}
+
+#eventosCalendarioContainer {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Cada evento */
+.evento {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+}
+
+/* Icono de fecha */
+.evento .fecha {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+/* Colores por tipo */
+.feriado {
+    background-color: #ffe6e6;
+    color: #d80000;
+}
+
+.no-clases {
+    background-color: #fff4e6;
+    color: #ff8c00;
+}
+
+.evento-importante {
+    background-color: #e6f0ff;
+    color: #0040ff;
+}
+
+/* Mensaje de no hay eventos */
+.no-eventos {
+    font-style: italic;
+    color: gray;
+    padding: 1rem;
+}

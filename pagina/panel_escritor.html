@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Escritor</title>
+<link rel="stylesheet" href="../css/estilos.css">
+<link rel="stylesheet" href="../css/panel_escritor.css">
+<link rel="stylesheet" href="../css/noticias.css">
+<link rel="stylesheet" href="../css/calendario.css">
+
+<script src="../js/login.js" defer></script>
+<script src="../js/panel_escritor.js" defer></script>
+</head>
+<body>
+<header>
+    <h1>Panel de Escritor</h1>
+</header>
+
+<!-- Navbar dinámico -->
+<nav id="navPrincipal" class="navbar"></nav>
+
+<main>
+    <!-- Sección Crear Noticias -->
+    <section class="editor-container">
+        <h2>Crear Nueva Noticia</h2>
+        <input type="text" id="tituloNoticia" placeholder="Título de la noticia">
+        <input type="file" id="imagenNoticia" accept="image/*">
+        <div id="editor" contenteditable="true" class="editor" placeholder="Escribe el contenido aquí..."></div>
+        <button onclick="publicarNoticia()">Publicar Noticia</button>
+
+        <!-- Botón para agregar evento al calendario -->
+        <button id="btnAgregarEvento" onclick="mostrarFormularioEvento()">Agregar fecha al calendario</button>
+    </section>
+
+    <!-- Sección Mis Noticias -->
+    <section>
+        <h2>Mis Noticias Publicadas</h2>
+        <div id="noticiasContainer" class="noticias-grid"></div>
+    </section>
+
+    <!-- Sección Calendario -->
+    <section class="calendario-container" id="calendarioContainer" style="display:none;">
+        <h2>Agregar Evento al Calendario</h2>
+        <form id="formEvento" class="calendario-form">
+            <input type="date" id="fechaEvento" required>
+            <input type="text" id="tituloEvento" placeholder="Título del evento" required>
+            <select id="tipoEvento" required>
+                <option value="">Seleccionar tipo de evento</option>
+                <option value="titulo-feriado">Día Feriado</option>
+                <option value="titulo-no-clases">No hay clases</option>
+                <option value="titulo-evento">Evento importante</option>
+            </select>
+            <button type="submit">Guardar Evento</button>
+            <button type="button" onclick="ocultarFormularioEvento()">Cancelar</button>
+        </form>
+
+        <h3>Eventos existentes</h3>
+        <div id="eventosContainer"></div>
+    </section>
+</main>
+
+<footer>
+    © 2025 Escuela Técnica - La Plata
+</footer>
+</body>
+</html>
