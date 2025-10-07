@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iniciar Sesión</title>
+<link rel="stylesheet" href="../css/login.css">
+</head>
+<body>
+
+  <div class="login-container">
+  <h1>Iniciar sesión</h1>
+  <p style="margin:0 0 14px; color:#555;">Accede con tu cuenta de Google</p>
+  <div class="google-container">
+    <div id="g_id_signin"></div>
+    <noscript>Habilita JavaScript para usar Google Sign-In.</noscript>
+  </div>
+  <p id="mensajeError"></p>
+  </div>
+
+<!-- Load centralized login script -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="../js/login.js"></script>
+
+</body>
+</html>

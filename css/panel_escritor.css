@@ -1,0 +1,48 @@
+
+/* ================== */
+/* PANEL ESCRITOR     */
+/* ================== */
+
+.editor-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.editor-container h2 {
+    color: #004080;
+    margin-bottom: 1rem;
+}
+
+.editor-container input[type="text"], 
+.editor-container input[type="file"] {
+    width: 100%;
+    padding: 0.6rem;
+    margin-bottom: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1.1rem;
+}
+
+.editor {
+    width: 100%;
+    min-height: 200px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 1rem;
+}
+
+.editor:empty:before {
+    content: attr(placeholder);
+    color: #aaa;
+}
+
+.editor-container button {
+    padding: 0.7rem 1.2rem;
+}

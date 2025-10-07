@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escuela Técnica - Inicio</title>
+  <link rel="stylesheet" href="css/estilos.css">
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/noticias.css">
+
+  <script src="js/login.js" defer></script>
+  <script src="js/index_noticias.js" defer></script>
+
+</head>
+<body>
+  <header>
+    <h1>Escuela Técnica - La Plata</h1>
+
+    <!-- Botón de usuario con menú desplegable -->
+    <div class="user-menu">
+      <button class="user-btn">Cuenta ▼</button>
+      <div class="dropdown-content">
+        <a href="pagina/login.html">Iniciar sesión</a>
+        <a href="pagina/register.html">Registrarse</a>
+      </div>
+    </div>
+  </header>
+  <!-- Carrusel de imágenes -->
+<div class="slider">
+  <div class="slides" id="noticiasSlider"></div>
+</div>
+
+
+
+  <!-- Navbar dinámico -->
+  <nav id="navPrincipal" class="navbar"></nav>
+  <main>
+    <h2>Últimas Noticias</h2>
+    <div id="noticiasContainer" class="noticias-grid"></div>
+  </main>
+
+  <footer>
+    © 2025 Escuela Técnica - La Plata
+  </footer>
+
+  <script>
+    // Selecciona el botón y el menú
+    const userMenu = document.querySelector('.user-menu');
+    const userBtn = document.querySelector('.user-btn');
+
+    userBtn.addEventListener('click', () => {
+      userMenu.classList.toggle('show');
+    });
+
+    // Cerrar menú si se hace clic fuera
+    window.addEventListener('click', (e) => {
+      if (!userMenu.contains(e.target)) {
+        userMenu.classList.remove('show');
+      }
+    });
+  </script>
+</body>
+
+</html>

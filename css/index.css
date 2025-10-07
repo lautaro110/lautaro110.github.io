@@ -1,0 +1,106 @@
+/* Estilos específicos para index (se apoya en noticias.css) */
+/* Contenedor del menú */
+.user-menu {
+    position: relative;
+    display: inline-block;
+    /* Para que quede en la esquina derecha */
+    margin-left: 20px;
+    display: inline-block;
+    
+}
+
+/* Botón estilo Google (azul y letras blancas) */
+.user-btn {
+    background-color: #1a73e8;
+    /* Azul estilo Google */
+    color: white;
+    padding: 10px 18px;
+    font-size: 14px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Efecto hover */
+.user-btn:hover {
+    background-color: #155ab6;
+}
+
+/* Dropdown oculto inicialmente */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top:110%;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Estilo de enlaces dentro del menú */
+.dropdown-content a {
+    color: black;
+    padding: 5px 5px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Mostrar el menú cuando se active */
+.user-menu.show .dropdown-content {
+    display: block;
+}
+header {
+  display: flex;
+  justify-content: space-between;   
+  align-items: center;
+  padding: 15px 25px;
+  border-bottom: 2px solid #ddd;
+}
+header h1 {
+  align-items: center;
+  font-size: 22px;
+  
+}
+/* ====== SLIDER DE NOTICIAS ====== */
+.slider {
+  width: 100%;
+  height: 400px;
+  position: relative;
+  overflow: hidden;
+}
+
+.slides a {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation: fade 12s infinite;
+}
+
+.slides img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* se adapta al contenedor */
+  border-radius: 8px;
+}
+
+/* Animación fade */
+@keyframes fade {
+  0%   { opacity: 0; }
+  8%   { opacity: 1; }
+  33%  { opacity: 1; }
+  41%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+

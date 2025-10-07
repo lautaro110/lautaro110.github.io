@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin</title>
+<link rel="stylesheet" href="../css/estilos.css">
+<link rel="stylesheet" href="../css/panel_admin.css">
+<link rel="stylesheet" href="../css/noticias.css">
+
+<script src="../js/login.js" defer></script>
+<script src="../js/panel_admin.js" defer></script>
+</head>
+<body>
+<header>
+    <h1>Panel del Administrador</h1>
+</header>
+
+<!-- Navbar dinámico -->
+<nav id="navPrincipal" class="navbar"></nav>
+
+<main>
+    <p>Bienvenido <span id="usuarioActual"></span></p>
+
+    <section class="admin-section">
+        <h2>Agregar Escritor</h2>
+        <input type="text" id="nuevoUsuario" placeholder="Usuario"><br>
+        <input type="password" id="nuevaPassword" placeholder="Contraseña"><br>
+        <button id="btnAgregarEscritor">Agregar Escritor</button>
+    </section>
+
+    <section class="admin-section">
+        <h2>Lista de Escritores</h2>
+        <ul id="listaEscritores"></ul>
+    </section>
+
+    <section class="admin-section">
+        <h2>Noticias Publicadas</h2>
+        <div id="noticiasContainer" class="noticias-grid"></div>
+    </section>
+
+    <a href="../index.html">Volver al inicio</a>
+</main>
+
+<footer>
+    © 2025 Escuela Técnica - La Plata
+</footer>
+</body>
+</html>
