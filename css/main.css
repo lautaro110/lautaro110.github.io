@@ -1,0 +1,43 @@
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1e1e2f;
+    color: #fff;
+    padding: 10px 20px;
+}
+.navbar .logo {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+.navbar .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+}
+.navbar .nav-links li a {
+    color: #fff;
+}
+.navbar .search-box input {
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+}
+
+/* Botón de login de Google */
+.google-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #fff;
+    color: #555;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+.google-btn img {
+    width: 20px;
+    border-radius: 50%;
+}

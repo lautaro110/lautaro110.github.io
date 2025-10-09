@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contacto</title>
+  <link rel="stylesheet" href="../css/estilos.css" />
+  <link rel="stylesheet" href="../css/contacto.css" />
+  <script src="../js/login.js" defer></script>
+  <style>
+    main {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input,
+    textarea {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+    }
+
+    button {
+      background-color: #2d89ef;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #1b5fad;
+    }
+
+    #estadoMensaje {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 15px;
+      font-size: 1.1em;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Contacto</h1>
+  </header>
+
+  <!-- Navbar dinámica -->
+  <nav id="navPrincipal" class="navbar"></nav>
+
+  <main>
+    <!-- Contexto explicativo -->
+    <div class="contacto-contexto">
+      <p>
+        Bienvenido al formulario de contacto. Aquí puedes comunicarte con los
+        administradores de la página para:
+      </p>
+      <ul>
+        <li>Hacer consultas sobre el contenido de la web.</li>
+        <li>Reportar problemas o errores.</li>
+        <li>Proponer mejoras o nuevas funcionalidades.</li>
+      </ul>
+      <p>
+        Por favor completa todos los campos para que podamos responderte de
+        manera efectiva.
+      </p>
+    </div>
+
+    <!-- Formulario -->
+    <form id="formContacto">
+      <input type="text" id="nombre" name="nombre" placeholder="Nombre completo" required />
+      <input type="email" id="email" name="email" placeholder="Correo electrónico" required />
+      <textarea id="mensaje" name="mensaje" placeholder="Escribe tu mensaje aquí..." required></textarea>
+      <button type="submit">Enviar</button>
+      <p id="estadoMensaje"></p>
+    </form>
+  </main>
+
+  <footer>© 2025 Escuela Técnica - La Plata</footer>
+
+  <script>
+    document.getElementById("formContacto").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const datos = new FormData(this);
+      const estado = document.getElementById("estadoMensaje");
+
+      estado.textContent = "Enviando mensaje...";
+      estado.style.color = "#555";
+
+      fetch("http://localhost/web-escolar/php/enviar.php", {
+        method: "POST",
+        body: datos,
+      })
+        .then(async (res) => {
+          const text = await res.text();
+          let data;
+
+          try {
+            data = JSON.parse(text);
+          } catch {
+            console.error("Respuesta no válida del servidor:", text);
+            throw new Error("Respuesta no válida del servidor");
+          }
+
+          estado.textContent = data.message;
+          estado.style.color = data.status === "success" ? "green" : "red";
+
+          if (data.status === "success") {
+            document.getElementById("formContacto").reset();
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          estado.textContent =
+            "Error al enviar el mensaje. Verificá la conexión o intentá de nuevo.";
+          estado.style.color = "red";
+        });
+    });
+  </script>
+</body>
+
+</html>
