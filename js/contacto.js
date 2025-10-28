@@ -1,49 +1,58 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('formContacto');
-  const btn = document.getElementById('btnEnviarContacto');
-  if (!form || !btn) return;
+  const form = document.getElementById('contactForm');
+  const resultEl = document.getElementById('contactResult');
+  const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+
+  if (!form) return;
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    const usuario = localStorage.getItem('usuario');
-    if (!usuario) {
-      alert('Debes iniciar sesión con tu cuenta para enviar el mensaje.');
-      return;
+    if (submitBtn) submitBtn.disabled = true;
+    if (resultEl) {
+      resultEl.textContent = 'Enviando mensaje...';
+      resultEl.style.color = '#555';
     }
 
-    const nombre = document.getElementById('nombre').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const mensaje = document.getElementById('mensaje').value.trim();
-
-    if (!nombre || !email || !mensaje) {
-      alert('Completa nombre, correo y mensaje.');
-      return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = 'Enviando...';
+    const formData = new FormData(form);
 
     try {
-      const res = await fetch('../php/send_contact.php', { credentials: 'include', // 🔹 agregado: enviar cookies/sesión
-
+      const res = await fetch(form.action, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, email, mensaje, usuarioLogueado: usuario })
+        body: formData,
+        credentials: 'same-origin',
+        headers: { 'Accept': 'application/json' }
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        const err = (data && data.error) || 'Error inesperado';
-        alert('No se pudo enviar: ' + err);
-      } else {
-        alert('Mensaje enviado correctamente.');
-        form.reset();
+
+      const text = await res.text();
+      let data = null;
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        // respuesta no JSON; lo tratamos como texto
       }
-    } catch (e) {
-      alert('No se pudo enviar (error de red).');
+
+      if (!data) {
+        const msg = text.trim() || (res.ok ? 'Enviado correctamente' : 'Error del servidor');
+        if (resultEl) {
+          resultEl.textContent = msg;
+          resultEl.style.color = res.ok ? 'green' : 'red';
+        }
+        if (res.ok) form.reset();
+      } else {
+        if (resultEl) {
+          resultEl.textContent = data.message || (data.status === 'ok' ? 'Enviado correctamente' : 'Ocurrió un error');
+          resultEl.style.color = (data.status === 'ok' || data.status === 'success') ? 'green' : 'red';
+        }
+        if (data.status === 'ok' || data.status === 'success') form.reset();
+      }
+    } catch (err) {
+      console.error('Error enviando mensaje:', err);
+      if (resultEl) {
+        resultEl.textContent = 'Error de red o servidor.';
+        resultEl.style.color = 'red';
+      }
     } finally {
-      btn.disabled = false;
-      btn.textContent = 'Enviar';
+      if (submitBtn) submitBtn.disabled = false;
     }
   });
 });

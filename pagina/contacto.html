@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="icon" type="image/png" href="../img/logo-tecnica.png">
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contacto | Escuela Técnica - La Plata</title>
+  <link rel="icon" type="image/png" href="../img/logo-tecnica.png" />
 
   <!-- Estilos -->
   <link rel="stylesheet" href="../css/navegador.css" />
@@ -13,11 +13,10 @@
   <!-- Scripts -->
   <script src="../js/login.js" defer></script>
   <script src="../js/navbar.js" defer></script>
+  <script src="../js/contacto.js" defer></script>
 </head>
 
 <body>
-  
-  <!-- NAVBAR -->
   <header class="navegador">
     <div class="logo">
       <h1><a href="../index.html">Escuela Técnica - La Plata</a></h1>
@@ -31,104 +30,37 @@
     <nav id="navPrincipal" class="navbar"></nav>
   </header>
 
-  <!-- CONTENIDO PRINCIPAL -->
   <main>
-    
-    <!-- Texto de bienvenida -->
     <section class="contacto-contexto">
       <p>
-        Bienvenido al formulario de contacto. Aquí puedes comunicarte con los
-        administradores del sitio para:
+        Bienvenido al formulario de contacto. Aquí puedes comunicarte con los administradores del sitio para:
       </p>
       <ul>
         <li>Hacer consultas sobre el contenido de la web.</li>
         <li>Reportar problemas o errores.</li>
         <li>Proponer mejoras o nuevas funcionalidades.</li>
       </ul>
-      <p>
-        Por favor, completa todos los campos para que podamos responderte de manera efectiva.
-      </p>
+      <p>Por favor, completa todos los campos para que podamos responderte de manera efectiva.</p>
     </section>
 
-    <!-- FORMULARIO -->
-    
-<!-- NUEVO FORMULARIO DE CONTACTO CON LÍMITE DE MENSAJES -->
-<form id="contactForm" method="post" action="../php/send_message_to_admin.php">
-  <h2>Contactar al Administrador</h2>
-  <div class="form-group">
-    <label for="subject">Asunto:</label>
-    <input type="text" name="subject" id="subject" maxlength="255" required />
-  </div>
-  <div class="form-group">
-    <label for="message">Mensaje:</label>
-    <textarea name="message" id="message" minlength="3" required></textarea>
-  </div>
-  <button type="submit">Enviar</button>
-  <p id="contactResult"></p>
-</form>
+    <form id="contactForm" method="post" action="../php/send_message_to_admin.php" novalidate>
+      <h2>Contactar al Administrador</h2>
 
-<script>
-document.getElementById('contactForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  const form = this;
-  const fd = new FormData(form);
-  fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin' })
-    .then(res => res.json())
-    .then(data => {
-      const r = document.getElementById('contactResult');
-      if (data.status === 'ok') {
-        r.textContent = data.message;
-        form.reset();
-      } else {
-        r.textContent = data.message || 'Error desconocido';
-      }
-    })
-    .catch(err => {
-      document.getElementById('contactResult').textContent = 'Error de red o servidor.';
-    });
-});
-</script>
+      <div class="form-group">
+        <label for="subject">Asunto:</label>
+        <input type="text" name="subject" id="subject" maxlength="255" required />
+      </div>
 
+      <div class="form-group">
+        <label for="message">Mensaje:</label>
+        <textarea name="message" id="message" minlength="3" required></textarea>
+      </div>
+
+      <button type="submit">Enviar</button>
+      <p id="contactResult" role="status" aria-live="polite"></p>
+    </form>
   </main>
 
   <footer>© 2025 Escuela Técnica - La Plata</footer>
-
-  <!-- SCRIPT DEL FORMULARIO -->
-  <script>
-    document.getElementById("formContacto").addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const datos = new FormData(this);
-      const estado = document.getElementById("estadoMensaje");
-
-      estado.textContent = "Enviando mensaje...";
-      estado.style.color = "#555";
-
-      try {
-        const res = await fetch("http://localhost/web-escolar/php/enviar.php", {
-          method: "POST",
-          body: datos,
-        });
-
-        const text = await res.text();
-        let data;
-
-        try {
-          data = JSON.parse(text);
-        } catch {
-          console.error("Respuesta no válida del servidor:", text);
-          throw new Error("Respuesta no válida del servidor");
-        }
-
-        estado.textContent = data.message;
-        estado.style.color = data.status === "success" ? "green" : "red";
-
-        if (data.status === "success") this.reset();
-      } catch (err) {
-        console.error(err);
-        estado.textContent = "Error al enviar el mensaje. Verificá tu conexión o intentá de nuevo.";
-        estado.style.color = "red";
-      }
-    });
-  </script>
 </body>
 </html>
