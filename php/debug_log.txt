@@ -1,0 +1,12 @@
+[14:17:13] user_id=NULL ip=::1 key=ip_::1 count=0
+[14:17:13] OK: Mensaje registrado. Nuevo total=1
+[14:17:14] user_id=NULL ip=::1 key=ip_::1 count=1
+[14:17:14] OK: Mensaje registrado. Nuevo total=2
+[14:17:15] user_id=NULL ip=::1 key=ip_::1 count=2
+[14:17:15] OK: Mensaje registrado. Nuevo total=3
+[14:17:16] user_id=NULL ip=::1 key=ip_::1 count=3
+[14:17:16] BLOQUEADO: Límite alcanzado para ip_::1.
+[14:17:16] user_id=NULL ip=::1 key=ip_::1 count=3
+[14:17:16] BLOQUEADO: Límite alcanzado para ip_::1.
+[14:17:16] user_id=NULL ip=::1 key=ip_::1 count=3
+[14:17:16] BLOQUEADO: Límite alcanzado para ip_::1.

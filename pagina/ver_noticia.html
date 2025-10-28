@@ -1,31 +1,46 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Noticia Completa</title>
-<link rel="stylesheet" href="../css/estilos.css">
-<link rel="stylesheet" href="../css/ver_noticia.css">
-<link rel="stylesheet" href="../css/noticias.css">
+   <link rel="icon" type="image/png" href="../img/logo-tecnica.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ver Noticia</title>
 
-<script src="../js/login.js" defer></script>
-<script src="../js/ver_noticia.js" defer></script>
+  <!-- Estilos -->
+  <link rel="stylesheet" href="../css/navegador.css" />
+  <link rel="stylesheet" href="../css/ver_noticia.css" />
 </head>
+
 <body>
-<header>
-    <h1>Noticia Completa</h1>
-</header>
+  <!-- NAVBAR -->
+  <header class="navegador">
+    <div class="logo">
+      <h1><a href="../index.html">Escuela Técnica - La Plata</a></h1>
+    </div>
+    <div class="buscador" style="display: none;">
+      <input type="text" id="buscarNoticias" placeholder="Buscar noticias..." />
+      <button id="btnBuscar">🔍</button>
+    </div>
+    <nav id="navPrincipal" class="navbar"></nav>
+  </header>
 
-<!-- Navbar dinámico -->
-<nav id="navPrincipal" class="navbar"></nav>
+  <!-- BOTÓN VOLVER FIJO -->
+  <button class="btn-volver" id="btnVolver">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z" />
+    </svg>
+    Volver
+  </button>
 
-<main>
-    <div id="noticiaCompleta"></div>
-    <a href="../index.html">Volver a Inicio</a>
-</main>
+  <!-- CONTENIDO DE LA NOTICIA -->
+  <main class="contenido-noticia">
+    <div id="noticiaContainer">
+      <p>Cargando noticia...</p>
+    </div>
+  </main>
 
-<footer>
-    © 2025 Escuela Técnica - La Plata
-</footer>
+  <!-- Scripts -->
+  <script src="../js/navbar.js" defer></script>
+  <script src="../js/ver_noticia.js" defer></script>
 </body>
 </html>

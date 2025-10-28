@@ -1,1 +1,100 @@
-/* Estilos específicos para ver_noticia (actualmente ninguno adicional) */
+/* =====================
+   ESTILOS GENERALES
+   ===================== */
+body {
+  margin: 0;
+  background: linear-gradient(135deg, #0b0b29, #25255c);
+  font-family: 'Poppins', sans-serif;
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.contenido-noticia {
+  max-width: 900px;
+  margin: 6rem auto 3rem;
+  padding: 2rem;
+  background: #fff;
+  color: #333;
+  border-radius: 1rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* TÍTULO Y AUTOR */
+.contenido-noticia h1 {
+  color: #0b0b2b;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.contenido-noticia .autor {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+/* MINIATURA/IMAGEN DESTACADA */
+.contenido-noticia .imagen-noticia {
+  width: 100%;
+  max-height: 450px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1.5rem;
+}
+
+/* CONTENIDO HTML DE LA NOTICIA */
+.contenido-noticia .contenido {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #333;
+}
+
+/* =====================
+   BOTÓN VOLVER FIJO (ESTILO PREMIUM)
+   ===================== */
+.btn-volver {
+  position: fixed;
+  top: 90px;
+  left: 25px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  z-index: 9999;
+}
+
+.btn-volver svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.btn-volver:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #d0d0ff;
+  transform: translateX(-3px);
+}
+
+/* RESPONSIVE */
+@media (max-width: 500px) {
+  body {
+    padding-top: 60px;
+  }
+  .btn-volver {
+    top: 10px;
+    left: 10px;
+    font-size: 0.95rem;
+    padding: 0.3rem 0.7rem;
+  }
+}

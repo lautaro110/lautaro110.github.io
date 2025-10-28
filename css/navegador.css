@@ -1,0 +1,333 @@
+/* =============================
+   NAVBAR UNIVERSAL INSPIRADO EN PLAYSTATION
+   ============================= */
+
+.navegador {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0b0b2b;
+  color: #fff;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  font-family: 'Segoe UI', sans-serif;
+  transition: background 0.3s ease;
+}
+
+/* -------- LOGO -------- */
+.navegador .logo h1 {
+  font-size: 1.5rem;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.navegador .logo a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.navegador .logo a:hover {
+  color: #4da6ff;
+  text-shadow: 0 0 8px #4da6ff;
+}
+
+/* -------- BUSCADOR -------- */
+.buscador {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.buscador input {
+  background: #1a1a3d;
+  border: 1px solid #2e2e5c;
+  color: #fff;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  width: 200px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.buscador input:focus {
+  outline: none;
+  border-color: #4da6ff;
+  box-shadow: 0 0 8px #4da6ff;
+}
+
+.buscador button {
+  background: #4da6ff;
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+}
+
+.buscador button:hover {
+  background: #3385ff;
+  transform: scale(1.05);
+  box-shadow: 0 0 8px #3385ff;
+}
+
+/* -------- NAVBAR BOTONES -------- */
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.nav-link,
+.btn-login,
+.user-container {
+  white-space: nowrap;
+}
+
+/* Links principales */
+.nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease, text-shadow 0.3s;
+}
+
+.nav-link:hover {
+  color: #4da6ff;
+  text-shadow: 0 0 8px #4da6ff;
+}
+
+/* -------- LOGIN -------- */
+.btn-login {
+  background: #4da6ff;
+  border: none;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+}
+
+.btn-login:hover {
+  background: #3385ff;
+  transform: scale(1.05);
+  box-shadow: 0 0 8px #3385ff;
+}
+
+/* -------- PERFIL -------- */
+.user-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  gap: 0.6rem;
+  transition: transform 0.2s;
+}
+
+.user-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #4da6ff;
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.user-img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 8px #4da6ff;
+}
+
+.user-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: color 0.3s, text-shadow 0.3s;
+}
+
+.user-btn:hover {
+  color: #4da6ff;
+  text-shadow: 0 0 6px #4da6ff;
+}
+
+/* -------- MENÚ DESPLEGABLE -------- */
+.user-menu {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: #1a1a3d;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+  min-width: 180px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.user-menu.show {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.user-menu a,
+.user-menu button {
+  padding: 0.8rem 1rem;
+  text-align: left;
+  border: none;
+  background: none;
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s;
+  text-decoration: none;
+}
+
+.user-menu a:hover,
+.user-menu button:hover {
+  background: #2e2e5c;
+}
+
+/* -------- RESPONSIVE -------- */
+@media (max-width: 768px) {
+  .navegador {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 1rem;
+  }
+
+  .buscador {
+    width: 100%;
+  }
+
+  .buscador input {
+    flex: 1;
+  }
+
+  .navbar {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .user-container {
+    margin-top: 0.5rem;
+  }
+}
+.user-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-img {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+.user-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.user-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #fff;
+  color: #333;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  display: none;
+  flex-direction: column;
+  width: 160px;
+  z-index: 100;
+}
+
+.user-menu.show {
+  display: flex;
+}
+
+.user-menu a,
+.user-menu button {
+  padding: 0.7rem 1rem;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  color: #333;
+  transition: background 0.3s;
+}
+
+.user-menu a:hover,
+.user-menu button:hover {
+  background: #f1f1f1;
+}
+
+.btn-login,
+.btn-registrarse {
+  margin-left: 1rem;
+  background: #fff;
+  color: #0b0b2b;
+  padding: 0.5rem 1rem;
+  border-radius: 0.4rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.btn-login:hover,
+.btn-registrarse:hover {
+  background: #e6e6e6;
+}
+
+
+
+/* ===============================
+   Estilos de autocompletado
+   =============================== */
+.sugerencias {
+  position: absolute;
+  background: #f8faff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  max-height: 160px;
+  overflow-y: auto;
+  width: 100%;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 1000;
+  display: none;
+}
+
+.sugerencia-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sugerencia-item:hover {
+  background: #e4f1ff;
+  color: #004080;
+}
+
+

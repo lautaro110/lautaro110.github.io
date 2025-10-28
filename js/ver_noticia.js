@@ -1,15 +1,64 @@
-document.addEventListener('DOMContentLoaded', ()=>{
-    actualizarNav();
-    const index = localStorage.getItem('noticiaActual');
-    const noticias = JSON.parse(localStorage.getItem('noticias') || '[]');
-    if(index === null || !noticias[index]) return;
+document.addEventListener("DOMContentLoaded", async () => {
+  const contenedor = document.getElementById("noticiaContainer");
+  const btnVolver = document.getElementById("btnVolver");
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
 
-    const n = noticias[index];
-    const cont = document.getElementById('noticiaCompleta');
-    cont.innerHTML = `
-        <h2>${n.titulo}</h2>
-        ${n.imagen ? `<img src="${n.imagen}" style="width:100%; max-height:400px; object-fit:cover;">` : ''}
-        <p>${n.contenido}</p>
-        <small>Publicado: ${n.fecha}</small>
+  // ============================
+  // BOTÓN VOLVER UNIVERSAL
+  // ============================
+  if (btnVolver) {
+    btnVolver.addEventListener("click", () => {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = "../index.html";
+      }
+    });
+  }
+
+  // ============================
+  // VALIDACIÓN DEL ID
+  // ============================
+  if (!id) {
+    contenedor.innerHTML = "<p style='color:red;'>Error: No se especificó la noticia.</p>";
+    return;
+  }
+
+  // ============================
+  // CARGAR NOTICIAS
+  // ============================
+  try {
+    const res = await fetch("../php/noticias.php", { cache: "no-store" });
+    if (!res.ok) throw new Error("No se pudo conectar con el servidor.");
+    
+    const noticias = await res.json();
+    if (!Array.isArray(noticias)) throw new Error("Formato de noticias inválido.");
+
+    const noticia = noticias.find(n => n.id == id);
+    if (!noticia) {
+      contenedor.innerHTML = "<p style='color:red;'>No se encontró la noticia.</p>";
+      return;
+    }
+
+    const imgSrc = noticia.imagen
+      ? `../${noticia.imagen}?v=${Date.now()}`
+      : "../img/sin_imagen.png";
+
+    contenedor.innerHTML = `
+      <h1>${noticia.titulo}</h1>
+      <p class="autor">Por ${noticia.autor} | ${noticia.fecha}</p>
+      <div class="imagen-wrapper">
+        <img src="${imgSrc}" alt="Portada" class="imagen-noticia">
+      </div>
+      <div class="contenido">${noticia.contenido}</div>
     `;
+
+    const imagen = contenedor.querySelector(".imagen-noticia");
+    if (imagen) imagen.scrollIntoView({ behavior: "smooth" });
+
+  } catch (error) {
+    console.error("Error al cargar la noticia:", error);
+    contenedor.innerHTML = `<p style='color:red;'>Error al cargar la noticia: ${error.message}</p>`;
+  }
 });

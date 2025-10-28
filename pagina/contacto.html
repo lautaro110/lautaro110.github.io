@@ -1,72 +1,134 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contacto</title>
-    <link rel="stylesheet" href="../css/estilos.css">
-    <link rel="stylesheet" href="../css/contacto.css">
+    <link rel="icon" type="image/png" href="../img/logo-tecnica.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contacto | Escuela Técnica - La Plata</title>
 
-    <script src="../js/login.js" defer></script>
+  <!-- Estilos -->
+  <link rel="stylesheet" href="../css/navegador.css" />
+  <link rel="stylesheet" href="../css/contacto_v2.css" />
+
+  <!-- Scripts -->
+  <script src="../js/login.js" defer></script>
+  <script src="../js/navbar.js" defer></script>
 </head>
 
 <body>
-    <header>
-        <h1>Contacto</h1>
-    </header>
+  
+  <!-- NAVBAR -->
+  <header class="navegador">
+    <div class="logo">
+      <h1><a href="../index.html">Escuela Técnica - La Plata</a></h1>
+    </div>
 
-    <!-- Navbar dinámico -->
+    <div class="buscador" style="display: none;">
+      <input type="text" id="buscarNoticias" placeholder="Buscar noticias..." />
+      <button id="btnBuscar">🔍</button>
+    </div>
+
     <nav id="navPrincipal" class="navbar"></nav>
+  </header>
 
-    <main>
-        <!-- Contexto explicativo -->
-        <div class="contacto-contexto">
-            <p>Bienvenido al formulario de contacto. Aquí puedes comunicarte con los administradores de la página para:</p>
-            <ul>
-                <li>Hacer consultas sobre el contenido de la web.</li>
-                <li>Reportar problemas o errores.</li>
-                <li>Proponer mejoras o nuevas funcionalidades.</li>
-            </ul>
-            <p>Por favor completa todos los campos para que podamos responderte de manera efectiva.</p>
-        </div>
+  <!-- CONTENIDO PRINCIPAL -->
+  <main>
+    
+    <!-- Texto de bienvenida -->
+    <section class="contacto-contexto">
+      <p>
+        Bienvenido al formulario de contacto. Aquí puedes comunicarte con los
+        administradores del sitio para:
+      </p>
+      <ul>
+        <li>Hacer consultas sobre el contenido de la web.</li>
+        <li>Reportar problemas o errores.</li>
+        <li>Proponer mejoras o nuevas funcionalidades.</li>
+      </ul>
+      <p>
+        Por favor, completa todos los campos para que podamos responderte de manera efectiva.
+      </p>
+    </section>
 
-        <!-- Formulario -->
-        <form id="formContacto">
-            <input type="text" id="nombre" name="nombre" placeholder="Nombre completo" required>
-            <input type="email" id="email" name="email" placeholder="Correo electrónico" required>
-            <textarea id="mensaje" name="mensaje" placeholder="Escribe tu mensaje aquí..." required></textarea>
-            <button type="submit">Enviar</button>
-        </form>
-    </main>
+    <!-- FORMULARIO -->
+    
+<!-- NUEVO FORMULARIO DE CONTACTO CON LÍMITE DE MENSAJES -->
+<form id="contactForm" method="post" action="../php/send_message_to_admin.php">
+  <h2>Contactar al Administrador</h2>
+  <div class="form-group">
+    <label for="subject">Asunto:</label>
+    <input type="text" name="subject" id="subject" maxlength="255" required />
+  </div>
+  <div class="form-group">
+    <label for="message">Mensaje:</label>
+    <textarea name="message" id="message" minlength="3" required></textarea>
+  </div>
+  <button type="submit">Enviar</button>
+  <p id="contactResult"></p>
+</form>
 
-    <footer>
-        © 2025 Escuela Técnica - La Plata
-    </footer>
+<script>
+document.getElementById('contactForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const form = this;
+  const fd = new FormData(form);
+  fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin' })
+    .then(res => res.json())
+    .then(data => {
+      const r = document.getElementById('contactResult');
+      if (data.status === 'ok') {
+        r.textContent = data.message;
+        form.reset();
+      } else {
+        r.textContent = data.message || 'Error desconocido';
+      }
+    })
+    .catch(err => {
+      document.getElementById('contactResult').textContent = 'Error de red o servidor.';
+    });
+});
+</script>
 
-    <script>
-        // Evento submit del formulario
-        document.getElementById('formContacto').addEventListener('submit', function (e) {
-            e.preventDefault();
+  </main>
 
-            const datos = new FormData(this);
+  <footer>© 2025 Escuela Técnica - La Plata</footer>
 
-            fetch('http://localhost/proyecto_escuela/php/enviar.php', {
-                method: 'POST',
-                body: datos
-            })
-            .then(res => res.json())
-            .then(data => {
-                alert(data.message);
-                if (data.status === 'success') {
-                    // Limpiar el formulario si se envió correctamente
-                    document.getElementById('formContacto').reset();
-                }
-            })
-            .catch(() => {
-                alert('Error al enviar el mensaje');
-            });
+  <!-- SCRIPT DEL FORMULARIO -->
+  <script>
+    document.getElementById("formContacto").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const datos = new FormData(this);
+      const estado = document.getElementById("estadoMensaje");
+
+      estado.textContent = "Enviando mensaje...";
+      estado.style.color = "#555";
+
+      try {
+        const res = await fetch("http://localhost/web-escolar/php/enviar.php", {
+          method: "POST",
+          body: datos,
         });
-    </script>
+
+        const text = await res.text();
+        let data;
+
+        try {
+          data = JSON.parse(text);
+        } catch {
+          console.error("Respuesta no válida del servidor:", text);
+          throw new Error("Respuesta no válida del servidor");
+        }
+
+        estado.textContent = data.message;
+        estado.style.color = data.status === "success" ? "green" : "red";
+
+        if (data.status === "success") this.reset();
+      } catch (err) {
+        console.error(err);
+        estado.textContent = "Error al enviar el mensaje. Verificá tu conexión o intentá de nuevo.";
+        estado.style.color = "red";
+      }
+    });
+  </script>
 </body>
 </html>

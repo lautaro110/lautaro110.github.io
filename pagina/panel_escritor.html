@@ -1,67 +1,145 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Escritor</title>
-<link rel="stylesheet" href="../css/estilos.css">
-<link rel="stylesheet" href="../css/panel_escritor.css">
-<link rel="stylesheet" href="../css/noticias.css">
-<link rel="stylesheet" href="../css/calendario.css">
+   <link rel="icon" type="image/png" href="../img/logo-tecnica.png">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Panel del Escritor</title>
 
-<script src="../js/login.js" defer></script>
-<script src="../js/panel_escritor.js" defer></script>
+  <!-- Estilos -->
+  <link rel="stylesheet" href="../css/navegador.css">
+  <link rel="stylesheet" href="../css/panel_escritor.css">
+  <link rel="stylesheet" href="../css/noticias.css">
+  <link rel="stylesheet" href="../css/calendario.css">
+
+  <!-- Scripts -->
+  <script src="../js/navbar.js" defer></script>
+  <script src="../js/login.js" defer></script>
+  <script src="../js/panel_escritor.js" defer></script>
+  <script src="../js/calendario.js" defer></script>
 </head>
+
 <body>
-<header>
-    <h1>Panel de Escritor</h1>
+<header class="navegador">
+  <div class="logo">
+    <h1><a href="../index.html">Escuela Técnica - La Plata</a></h1>
+  </div>
+  <div class="buscador oculto">
+    <input type="text" id="buscarNoticias" placeholder="Buscar noticias...">
+    <button id="btnBuscar">🔍</button>
+  </div>
+  <nav id="navPrincipal" class="navbar"></nav>
 </header>
 
-<!-- Navbar dinámico -->
-<nav id="navPrincipal" class="navbar"></nav>
+<main class="panel-main">
+  <!-- BOTONES PARA ALTERNAR NOTICIA / CALENDARIO -->
+  <div id="toggleBotones" class="toggle-botones" style="display:flex;justify-content:center;gap:10px;margin:15px 0;"></div>
 
-<main>
-    <!-- Sección Crear Noticias -->
-    <section class="editor-container">
-        <h2>Crear Nueva Noticia</h2>
-        <input type="text" id="tituloNoticia" placeholder="Título de la noticia">
-        <input type="file" id="imagenNoticia" accept="image/*">
-        <div id="editor" contenteditable="true" class="editor" placeholder="Escribe el contenido aquí..."></div>
-        <button onclick="publicarNoticia()">Publicar Noticia</button>
+  <!-- CONTENIDO NOTICIAS -->
+  <section class="editor-container" id="contenidoNoticias">
+    <h2>🖋️ Crear Nueva Noticia</h2>
+    <div id="mensajeContainer"></div>
 
-        <!-- Botón para agregar evento al calendario -->
-        <button id="btnAgregarEvento" onclick="mostrarFormularioEvento()">Agregar fecha al calendario</button>
-    </section>
+    <form id="formNoticia" enctype="multipart/form-data" autocomplete="off">
+      <label for="tituloNoticia">Título de la noticia</label>
+      <input type="text" id="tituloNoticia" name="titulo" placeholder="Ej: Jornada de Puertas Abiertas" required>
 
-    <!-- Sección Mis Noticias -->
-    <section>
-        <h2>Mis Noticias Publicadas</h2>
-        <div id="noticiasContainer" class="noticias-grid"></div>
-    </section>
+      <input type="hidden" id="autorNoticia" name="autor">
+      <input type="hidden" id="fechaNoticia" name="fecha">
 
-    <!-- Sección Calendario -->
-    <section class="calendario-container" id="calendarioContainer" style="display:none;">
-        <h2>Agregar Evento al Calendario</h2>
-        <form id="formEvento" class="calendario-form">
-            <input type="date" id="fechaEvento" required>
-            <input type="text" id="tituloEvento" placeholder="Título del evento" required>
-            <select id="tipoEvento" required>
-                <option value="">Seleccionar tipo de evento</option>
-                <option value="titulo-feriado">Día Feriado</option>
-                <option value="titulo-no-clases">No hay clases</option>
-                <option value="titulo-evento">Evento importante</option>
-            </select>
-            <button type="submit">Guardar Evento</button>
-            <button type="button" onclick="ocultarFormularioEvento()">Cancelar</button>
-        </form>
+      <label for="imagenNoticia">Imagen destacada (opcional)</label>
+      <input type="file" id="imagenNoticia" name="imagen" accept="image/*">
+      <img id="previewImagen" alt="Vista previa" style="display:none; max-width:200px; margin:10px 0; border-radius:10px; box-shadow:0 0 6px rgba(0,0,0,0.2);">
 
-        <h3>Eventos existentes</h3>
-        <div id="eventosContainer"></div>
-    </section>
+      <div class="editor-toolbar" role="toolbar" aria-label="Barra de herramientas de edición">
+        <button type="button" data-cmd="bold" title="Negrita"><b>B</b></button>
+        <button type="button" data-cmd="italic" title="Cursiva"><i>I</i></button>
+        <button type="button" data-cmd="underline" title="Subrayado"><u>U</u></button>
+
+        <select id="fontSizeSelect" title="Tamaño de fuente">
+          <option value="">Tamaño</option>
+          <option value="1">Pequeño</option>
+          <option value="3" selected>Normal</option>
+          <option value="5">Grande</option>
+          <option value="7">Muy grande</option>
+        </select>
+
+        <button type="button" data-cmd="justifyleft" title="Alinear a la izquierda">⟸</button>
+        <button type="button" data-cmd="justifycenter" title="Centrar">≡</button>
+        <button type="button" data-cmd="justifyright" title="Alinear a la derecha">⟹</button>
+
+        <button type="button" id="insertLinkBtn" title="Insertar enlace">🔗</button>
+        <input type="file" id="insertImageFile" accept="image/*" style="display:none;">
+        <button type="button" id="insertImageBtn" title="Insertar imagen">🖼️</button>
+      </div>
+
+      <div id="editor" class="editor" contenteditable="true" placeholder="Escribe el contenido de la noticia aquí..." aria-label="Editor de contenido"></div>
+
+      <div class="botones-editor">
+        <button type="submit" class="btn-primario">📢 Publicar Noticia</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- MIS NOTICIAS -->
+  <section class="mis-noticias">
+    <h2>📰 Mis Noticias Publicadas</h2>
+    <div id="listaNoticias" class="noticias-grid">
+      <p class="placeholder">Todavía no has publicado ninguna noticia.</p>
+    </div>
+  </section>
+
+  <!-- CALENDARIO -->
+  <section class="calendario-container" id="calendarioContainer" style="display:none;">
+    <h2>📅 Agregar Evento al Calendario</h2>
+    <div class="calendario-mes">
+      <div id="calendarHeader" class="calendar-header">
+        <button id="prevMonth">◀</button>
+        <span id="monthYear"></span>
+        <button id="nextMonth">▶</button>
+      </div>
+      <table id="calendarTable">
+        <thead>
+          <tr>
+            <th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th><th>Dom</th>
+          </tr>
+        </thead>
+        <tbody id="calendarBody"></tbody>
+      </table>
+    </div>
+
+    <!-- FORMULARIO DE EVENTO -->
+    <form id="formEvento" class="calendario-form">
+      <input type="text" id="tituloEvento" placeholder="Título del evento" required>
+      <select id="tipoEvento" required>
+        <option value="">Seleccionar tipo de evento</option>
+        <option value="titulo-feriado">Día Feriado</option>
+        <option value="titulo-no-clases">No hay clases</option>
+        <option value="titulo-evento">Evento importante</option>
+      </select>
+
+      <!-- INPUT DE FECHA CORREGIDO -->
+      <label>Fecha del evento:</label>
+      <input type="date" id="fechaEvento" required>
+
+      <label>Hora inicio:</label>
+      <input type="time" id="horaInicio" required>
+      <label>Hora fin:</label>
+      <input type="time" id="horaFin" required>
+      <label>Descripción:</label>
+      <textarea id="descripcionEvento" placeholder="Descripción del evento"></textarea>
+
+      <div class="botones-form">
+        <button type="submit" class="btn-primario">Guardar Evento</button>
+        <button type="button" class="btn-secundario" onclick="ocultarFormularioEvento()">Cancelar</button>
+      </div>
+    </form>
+
+    <h3>Eventos existentes</h3>
+    <div id="eventosContainer"></div>
+  </section>
 </main>
 
-<footer>
-    © 2025 Escuela Técnica - La Plata
-</footer>
+<footer>© 2025 Escuela Técnica - La Plata</footer>
 </body>
 </html>

@@ -1,65 +1,63 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+    <link rel="icon" type="image/png" href="img/logo-tecnica.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Escuela Técnica - Inicio</title>
-  <link rel="stylesheet" href="css/estilos.css">
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/navegador.css">
   <link rel="stylesheet" href="css/index.css">
   <link rel="stylesheet" href="css/noticias.css">
+  <link rel="stylesheet" href="css/calendario.css">
 
-  <script src="js/login.js" defer></script>
+  <!-- Scripts -->
+  <script src="js/navbar.js" defer></script>
   <script src="js/index_noticias.js" defer></script>
-
+  <script src="js/calendario_flotante.js" defer></script>
 </head>
 <body>
-  <header>
-    <h1>Escuela Técnica - La Plata</h1>
 
-    <!-- Botón de usuario con menú desplegable -->
-    <div class="user-menu">
-      <button class="user-btn">Cuenta ▼</button>
-      <div class="dropdown-content">
-        <a href="pagina/login.html">Iniciar sesión</a>
-        <a href="pagina/register.html">Registrarse</a>
-      </div>
+  <!-- HEADER / NAVBAR -->
+  <header class="navegador">
+    <div class="logo">
+      <h1><a href="index.html">Escuela Técnica - La Plata</a></h1>
     </div>
+
+    <div class="buscador">
+      <input type="text" id="buscarNoticias" placeholder="Buscar noticias..." />
+      <button id="btnBuscar">🔍</button>
+    </div>
+
+    <nav id="navPrincipal" class="navbar"></nav>
   </header>
-  <!-- Carrusel de imágenes -->
-<div class="slider">
-  <div class="slides" id="noticiasSlider"></div>
-</div>
 
+  <!-- SLIDER DE NOTICIAS -->
+  <div class="slider">
+    <div class="slides" id="noticiasSlider"></div>
+  </div>
 
-
-  <!-- Navbar dinámico -->
-  <nav id="navPrincipal" class="navbar"></nav>
+  <!-- GRID DE NOTICIAS -->
   <main>
     <h2>Últimas Noticias</h2>
     <div id="noticiasContainer" class="noticias-grid"></div>
   </main>
 
+  <!-- FOOTER -->
   <footer>
     © 2025 Escuela Técnica - La Plata
   </footer>
 
-  <script>
-    // Selecciona el botón y el menú
-    const userMenu = document.querySelector('.user-menu');
-    const userBtn = document.querySelector('.user-btn');
+  <!-- ICONO Y PANEL CALENDARIO -->
+  <div id="btnCalendarioFlotante" class="calendario-flotante" title="Fechas importantes">📅</div>
+  <div id="panelCalendario" class="panel-calendario" aria-hidden="true">
+    <div class="panel-header">
+      <h3>Fechas Importantes</h3>
+      <button id="cerrarPanelCalendario" class="cerrar-btn">❌</button>
+    </div>
+    <ul id="panelEventosLista"></ul>
+  </div>
 
-    userBtn.addEventListener('click', () => {
-      userMenu.classList.toggle('show');
-    });
-
-    // Cerrar menú si se hace clic fuera
-    window.addEventListener('click', (e) => {
-      if (!userMenu.contains(e.target)) {
-        userMenu.classList.remove('show');
-      }
-    });
-  </script>
 </body>
-
 </html>

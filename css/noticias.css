@@ -1,36 +1,95 @@
-
 /* ================== */
 /* NOTICIAS ESTILO BLOG */
 /* ================== */
 
+/* Contenedor de noticias en grid */
 .noticias-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 1rem;
     margin-top: 1.5rem;
 }
 
+/* Cada noticia mini */
 .noticia-mini {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
 }
 
+/* Hover efecto */
 .noticia-mini:hover {
     transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
 }
 
+/* Imagen de portada */
 .noticia-mini img {
     width: 100%;
-    height: 150px;
+    height: 180px;
     object-fit: cover;
+    display: block;
 }
 
+/* Contenido interno */
 .noticia-mini h3 {
-    padding: 0.5rem;
-    font-size: 1.1rem;
+    padding: 0.5rem 0.5rem 0 0.5rem;
+    font-size: 1.2rem;
     color: #004080;
+    margin: 0;
+}
+
+.noticia-mini p {
+    padding: 0.5rem;
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+/* Botones de acción dentro de la noticia (si se agregan) */
+.noticia-mini .acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+
+/* Placeholder cuando no hay noticias */
+.noticias-grid .placeholder {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #777;
+    font-style: italic;
+}
+
+/* -------------------- RESPONSIVE -------------------- */
+@media (max-width: 768px) {
+    .noticias-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .noticia-mini img {
+        height: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .noticia-mini img {
+        height: 120px;
+    }
+
+    .noticia-mini h3 {
+        font-size: 1rem;
+    }
+
+    .noticia-mini p {
+        font-size: 0.9rem;
+    }
 }

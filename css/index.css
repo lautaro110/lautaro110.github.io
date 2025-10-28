@@ -1,106 +1,124 @@
-/* Estilos específicos para index (se apoya en noticias.css) */
-/* Contenedor del menú */
-.user-menu {
-    position: relative;
-    display: inline-block;
-    /* Para que quede en la esquina derecha */
-    margin-left: 20px;
-    display: inline-block;
-    
+/* =====================
+   GRID DE NOTICIAS
+   ===================== */
+.noticias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
 }
 
-/* Botón estilo Google (azul y letras blancas) */
-.user-btn {
-    background-color: #1a73e8;
-    /* Azul estilo Google */
-    color: white;
-    padding: 10px 18px;
-    font-size: 14px;
-    border: none;
-    border-radius: 20px;
+.noticia-mini {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-/* Efecto hover */
-.user-btn:hover {
-    background-color: #155ab6;
-}
-
-/* Dropdown oculto inicialmente */
-.dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    top:110%;
-    background-color: white;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 10;
-    border-radius: 10px;
     overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* Estilo de enlaces dentro del menú */
-.dropdown-content a {
-    color: black;
-    padding: 5px 5px;
-    text-decoration: none;
-    display: block;
+.noticia-mini:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
 }
 
-.dropdown-content a:hover {
-    background-color: #f1f1f1;
+.noticia-mini img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
 }
 
-/* Mostrar el menú cuando se active */
-.user-menu.show .dropdown-content {
-    display: block;
+.noticia-mini h3 {
+    margin: 10px;
+    font-size: 1.1rem;
+    color: #004080;
 }
-header {
-  display: flex;
-  justify-content: space-between;   
-  align-items: center;
-  padding: 15px 25px;
-  border-bottom: 2px solid #ddd;
+
+.noticia-mini p {
+    margin: 0 10px 10px;
+    font-size: 0.9rem;
+    color: #333;
 }
-header h1 {
-  align-items: center;
-  font-size: 22px;
-  
-}
-/* ====== SLIDER DE NOTICIAS ====== */
+
+/* =====================
+   SLIDER DE NOTICIAS
+   ===================== */
 .slider {
-  width: 100%;
-  height: 400px;
-  position: relative;
-  overflow: hidden;
+    width: 100%;
+    height: 400px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
-.slides a {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  animation: fade 12s infinite;
+.slides a.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none; /* solo la slide visible será clicable */
 }
 
-.slides img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* se adapta al contenedor */
-  border-radius: 8px;
+.slides a.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
 }
 
-/* Animación fade */
+/* =====================
+   PUNTOS DE NAVEGACIÓN SLIDER
+   ===================== */
+#puntosSlider {
+    text-align: center;
+    position: absolute;
+    bottom: 15px;
+    width: 100%;
+    z-index: 10;
+}
+
+#puntosSlider span {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin: 0 5px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.6);
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#puntosSlider span.activo {
+    background: #fff;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+/* =====================
+   ANIMACIÓN FADE (solo de respaldo)
+   ===================== */
 @keyframes fade {
-  0%   { opacity: 0; }
-  8%   { opacity: 1; }
-  33%  { opacity: 1; }
-  41%  { opacity: 0; }
-  100% { opacity: 0; }
+    0%   { opacity: 0; }
+    8%   { opacity: 1; }
+    33%  { opacity: 1; }
+    41%  { opacity: 0; }
+    100% { opacity: 0; }
 }
 
+/* =====================
+   RESPONSIVE
+   ===================== */
+@media (max-width: 768px) {
+    .noticia-mini img { height: 150px; }
+    .slider { height: 250px; }
+}
 
+@media (max-width: 480px) {
+    .noticia-mini img { height: 120px; }
+    .slider { height: 180px; }
+    #puntosSlider span { width: 10px; height: 10px; margin: 0 3px; }
+}

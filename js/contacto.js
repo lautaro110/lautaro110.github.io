@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.textContent = 'Enviando...';
 
     try {
-      const res = await fetch('../php/send_contact.php', {
+      const res = await fetch('../php/send_contact.php', { credentials: 'include', // 🔹 agregado: enviar cookies/sesión
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre, email, mensaje, usuarioLogueado: usuario })

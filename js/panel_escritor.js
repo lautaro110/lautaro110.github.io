@@ -1,203 +1,231 @@
+function verNoticia(id) {
+  // Redirige a ver_noticias.html pasando el id por query string
+  window.location.href = `ver_noticia.html?id=${id}`;
+}
+
+
 // =======================
-// Ejecutar al cargar la página
+// PANEL ESCRITOR - Noticias
 // =======================
-document.addEventListener('DOMContentLoaded', () => {
-    actualizarNav();
-    cargarNoticias();
-    verificarAutorizacionCalendario();
-    cargarEventos();
+document.addEventListener("DOMContentLoaded", () => {
+  cargarNoticias();
+
+  const form = document.getElementById("formNoticia");
+  const inputImagen = document.getElementById("imagenNoticia");
+  const vistaPrevia = document.getElementById("previewImagen");
+  const editor = document.getElementById("editor");
+
+  // Vista previa de imagen
+  if (inputImagen && vistaPrevia) {
+    inputImagen.addEventListener("change", (e) => {
+      const archivo = e.target.files[0];
+      if (archivo) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          vistaPrevia.src = ev.target.result;
+          vistaPrevia.style.display = "block";
+        };
+        reader.readAsDataURL(archivo);
+      } else {
+        vistaPrevia.src = "";
+        vistaPrevia.style.display = "none";
+      }
+    });
+  }
+
+  // Enviar noticia (crear o editar)
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // completar campos ocultos
+      document.getElementById("fechaNoticia").value = new Date().toLocaleDateString("es-AR");
+      document.getElementById("autorNoticia").value = localStorage.getItem("usuario") || "Anónimo";
+
+      const idEditar = form.dataset.idEditar || null;
+      const imagenAnterior = form.dataset.imagenAnterior || "";
+      const datos = new FormData(form);
+      datos.append("contenido", editor.innerHTML);
+
+      try {
+        let respuesta;
+
+        if (idEditar) {
+          // ====== MODO EDICIÓN ======
+          datos.append("id", idEditar);
+          datos.append("imagenAnterior", imagenAnterior);
+
+          respuesta = await fetch("../php/noticias.php", {
+            method: "POST",
+            body: datos
+          });
+
+          const result = await respuesta.json();
+          if (result.error) throw new Error(result.error);
+
+          alert("✏️ Noticia actualizada correctamente");
+          delete form.dataset.idEditar;
+          delete form.dataset.imagenAnterior;
+
+        } else {
+          // ====== NUEVA NOTICIA ======
+          respuesta = await fetch("../php/noticias.php", { method: "POST", body: datos });
+          const result = await respuesta.json();
+          if (result.error) throw new Error(result.error);
+          alert("✅ Noticia publicada con éxito");
+        }
+
+        form.reset();
+        vistaPrevia.src = "";
+        vistaPrevia.style.display = "none";
+        editor.innerHTML = "";
+        cargarNoticias();
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error al guardar la noticia");
+      }
+    });
+  }
 });
 
 // =======================
-// Publicar una noticia
+// Cargar todas las noticias
 // =======================
-function publicarNoticia() {
-    const titulo = document.getElementById('tituloNoticia').value.trim();
-    const editor = document.getElementById('editor');
-    const contenido = editor.innerHTML.trim();
-    const inputImagen = document.getElementById('imagenNoticia');
-    const usuarioActual = localStorage.getItem('usuario');
+async function cargarNoticias() {
+  const contenedor = document.getElementById("listaNoticias");
+  if (!contenedor) return;
 
-    if (!titulo || !contenido) {
-        alert("Debe completar título y contenido.");
-        return;
+  try {
+    const res = await fetch("../php/noticias.php");
+    const noticias = await res.json();
+
+    if (!Array.isArray(noticias) || noticias.length === 0) {
+      contenedor.innerHTML = "<p>No hay noticias aún.</p>";
+      return;
     }
 
-    const noticias = JSON.parse(localStorage.getItem('noticias') || '[]');
+    contenedor.innerHTML = "";
+    noticias.reverse().forEach((n) => {
+      const card = document.createElement("div");
+      card.className = "noticia-mini";
 
-    const guardar = (imagen) => {
-        noticias.push({
-            titulo,
-            contenido,
-            imagen: imagen || '',
-            fecha: new Date().toLocaleString(),
-            autor: usuarioActual
-        });
-        localStorage.setItem('noticias', JSON.stringify(noticias));
+      const imgSrc = n.imagen ? `../${n.imagen}?v=${Date.now()}` : "../img/sin_imagen.png";
 
-        // Vaciar campos
-        document.getElementById('tituloNoticia').value = '';
-        editor.innerHTML = '';
-        inputImagen.value = '';
+      card.innerHTML = `
+        <img src="${imgSrc}" alt="Portada">
+        <h3>${n.titulo}</h3>
+        <p class="autor">${n.fecha}</p>
+        <p class="contenido">${n.contenido.substring(0, 100)}...</p>
+        <div class="acciones">
+          <button class="btn-ver" onclick="verNoticia(${n.id})">👁️ Ver</button>
+          <button class="btn-editar" onclick="editarNoticia(${n.id})">✏️ Editar</button>
+          <button class="btn-eliminar" onclick="eliminarNoticia(${n.id})">🗑️ Eliminar</button>
+        </div>
+      `;
 
-        cargarNoticias();
-        alert("Noticia publicada correctamente!");
-    };
-
-    if (inputImagen.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => guardar(e.target.result);
-        reader.readAsDataURL(inputImagen.files[0]);
-    } else {
-        guardar('');
-    }
-}
-
-// =======================
-// Cargar noticias del escritor actual
-// =======================
-function cargarNoticias() {
-    const cont = document.getElementById('noticiasContainer');
-    cont.innerHTML = '';
-    const usuarioActual = localStorage.getItem('usuario');
-    const noticias = JSON.parse(localStorage.getItem('noticias') || '[]');
-
-    const noticiasUsuario = noticias
-        .map((n, i) => ({ ...n, indexGlobal: i }))
-        .filter(n => n.autor === usuarioActual);
-
-    if (noticiasUsuario.length === 0) {
-        cont.innerHTML = '<p>No hay noticias publicadas.</p>';
-        return;
-    }
-
-    noticiasUsuario.forEach(n => {
-        const div = document.createElement('div');
-        div.className = 'noticia-mini';
-        div.innerHTML = `
-            ${n.imagen ? `<img src="${n.imagen}" alt="${n.titulo}">` : ''}
-            <h3>${n.titulo}</h3>
-            <p>${n.contenido.substring(0, 100)}...</p>
-        `;
-
-        // Botón eliminar
-        const btnEliminar = document.createElement('button');
-        btnEliminar.textContent = 'Eliminar';
-        btnEliminar.onclick = (e) => {
-            e.stopPropagation();
-            eliminarNoticia(n.indexGlobal);
-        };
-        div.appendChild(btnEliminar);
-
-        // Click para ver noticia completa
-        div.addEventListener('click', () => {
-            localStorage.setItem('noticiaActual', n.indexGlobal);
-            window.location.href = 'ver_noticia.html';
-        });
-
-        cont.appendChild(div);
+      contenedor.appendChild(card);
     });
+  } catch (error) {
+    console.error("Error al cargar noticias:", error);
+  }
 }
 
 // =======================
 // Eliminar noticia
 // =======================
-function eliminarNoticia(indexGlobal) {
-    if (!confirm("¿Desea eliminar esta noticia?")) return;
-    let noticias = JSON.parse(localStorage.getItem('noticias') || '[]');
-    noticias.splice(indexGlobal, 1);
-    localStorage.setItem('noticias', JSON.stringify(noticias));
-    cargarNoticias();
-}
+async function eliminarNoticia(id) {
+  if (!confirm("¿Seguro que querés eliminar esta noticia?")) return;
 
-// =======================
-// CALENDARIO ESCOLAR
-// =======================
-
-// Mostrar formulario de evento
-function mostrarFormularioEvento() {
-    const usuario = localStorage.getItem('usuario');
-    const escritoresAutorizados = JSON.parse(localStorage.getItem('autorizadosCalendario') || '[]');
-    if (!escritoresAutorizados.includes(usuario)) {
-        alert("No estás autorizado para agregar eventos al calendario.");
-        return;
-    }
-    document.getElementById('calendarioContainer').style.display = 'block';
-}
-
-// Ocultar formulario de evento
-function ocultarFormularioEvento() {
-    document.getElementById('calendarioContainer').style.display = 'none';
-}
-
-// Guardar evento en localStorage
-document.getElementById('formEvento')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const fecha = document.getElementById('fechaEvento').value;
-    const titulo = document.getElementById('tituloEvento').value.trim();
-    const tipo = document.getElementById('tipoEvento').value;
-
-    if (!fecha || !titulo || !tipo) {
-        alert("Complete todos los campos del evento.");
-        return;
-    }
-
-    let eventos = JSON.parse(localStorage.getItem('eventosCalendario') || '[]');
-    eventos.push({ fecha, titulo, tipo });
-    localStorage.setItem('eventosCalendario', JSON.stringify(eventos));
-
-    document.getElementById('fechaEvento').value = '';
-    document.getElementById('tituloEvento').value = '';
-    document.getElementById('tipoEvento').value = '';
-    cargarEventos();
-    alert("Evento agregado correctamente!");
-});
-
-// =======================
-// Cargar eventos del calendario
-// =======================
-function cargarEventos() {
-    const cont = document.getElementById('eventosContainer');
-    if (!cont) return;
-    cont.innerHTML = '';
-
-    const eventos = JSON.parse(localStorage.getItem('eventosCalendario') || '[]');
-    if (eventos.length === 0) {
-        cont.innerHTML = '<p>No hay eventos agregados.</p>';
-        return;
-    }
-
-    eventos.forEach((e, i) => {
-        const div = document.createElement('div');
-        div.className = 'evento-mini';
-        div.innerHTML = `<strong>${e.fecha}:</strong> ${e.titulo} <em>(${e.tipo.replace('titulo-', '')})</em>`;
-
-        // Botón eliminar evento
-        const btnEliminar = document.createElement('button');
-        btnEliminar.textContent = 'Eliminar';
-        btnEliminar.onclick = () => {
-            if (!confirm("¿Desea eliminar este evento?")) return;
-            let eventosActuales = JSON.parse(localStorage.getItem('eventosCalendario') || '[]');
-            eventosActuales.splice(i, 1);
-            localStorage.setItem('eventosCalendario', JSON.stringify(eventosActuales));
-            cargarEventos();
-        };
-        div.appendChild(btnEliminar);
-
-        cont.appendChild(div);
+  try {
+    const res = await fetch("../php/noticias.php", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
     });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    alert(data.mensaje || "🗑️ Noticia eliminada");
+    cargarNoticias();
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error al eliminar la noticia");
+  }
 }
 
 // =======================
-// Verifica si el usuario está autorizado para calendario
+// Editar noticia
 // =======================
-function verificarAutorizacionCalendario() {
-    const usuario = localStorage.getItem('usuario');
-    const btn = document.getElementById('btnAgregarEvento');
-    const escritoresAutorizados = JSON.parse(localStorage.getItem('autorizadosCalendario') || '[]');
-    if (!escritoresAutorizados.includes(usuario)) {
-        btn.style.display = 'none';
-    } else {
-        btn.style.display = 'inline-block';
+async function editarNoticia(id) {
+  try {
+    const res = await fetch("../php/noticias.php");
+    const noticias = await res.json();
+    const noticia = noticias.find((n) => n.id == id);
+    if (!noticia) {
+      alert("Noticia no encontrada");
+      return;
     }
+
+    const form = document.getElementById("formNoticia");
+    const vistaPrevia = document.getElementById("previewImagen");
+
+    if (form) {
+      form.dataset.idEditar = noticia.id;
+      form.dataset.imagenAnterior = noticia.imagen || "";
+
+      form.querySelector("#tituloNoticia").value = noticia.titulo;
+      document.getElementById("editor").innerHTML = noticia.contenido;
+      form.querySelector("#autorNoticia").value = noticia.autor;
+      form.querySelector("#fechaNoticia").value = noticia.fecha;
+
+      if (vistaPrevia && noticia.imagen) {
+        vistaPrevia.src = `../${noticia.imagen}`;
+        vistaPrevia.style.display = "block";
+      }
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error al editar la noticia");
+  }
 }
+
+// ===============================
+// 🔹 Cargar noticia a editar si viene desde panel admin
+// ===============================
+document.addEventListener("DOMContentLoaded", async () => {
+  const idEditar = localStorage.getItem("idEditarNoticia");
+  if (idEditar) {
+    try {
+      const res = await fetch("../php/noticias.php");
+      const noticias = await res.json();
+      const noticia = noticias.find(n => n.id == idEditar);
+
+      if (noticia) {
+        const form = document.getElementById("formNoticia");
+        const vistaPrevia = document.getElementById("previewImagen");
+
+        form.dataset.idEditar = noticia.id;
+        form.dataset.imagenAnterior = noticia.imagen || "";
+        form.querySelector("#tituloNoticia").value = noticia.titulo;
+        document.getElementById("editor").innerHTML = noticia.contenido;
+        form.querySelector("#autorNoticia").value = noticia.autor;
+        form.querySelector("#fechaNoticia").value = noticia.fecha;
+
+        if (vistaPrevia && noticia.imagen) {
+          vistaPrevia.src = `../${noticia.imagen}`;
+          vistaPrevia.style.display = "block";
+        }
+
+        // Limpia el ID del localStorage
+        localStorage.removeItem("idEditarNoticia");
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        alert("✏️ Modo edición activado desde el panel admin.");
+      }
+    } catch (err) {
+      console.error("Error al cargar noticia desde admin:", err);
+    }
+  }
+});

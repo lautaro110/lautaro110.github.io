@@ -1,90 +1,242 @@
+/* ===============================
+   PANEL ADMIN - Estilo Moderno + Botones Interactivos
+   =============================== */
 
-/* ================== */
-/* PANEL ADMIN - DASHBOARD */
-/* ================== */
-
-.admin-dashboard {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 2rem;
-    margin: 2rem auto;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-.admin-section {
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 10px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+body {
+  background: linear-gradient(180deg, #e8f0fe 0%, #f5f7fa 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  margin: 0;
+  padding: 0;
 }
 
-.admin-section h2 {
-    color: #004080;
-    margin-bottom: 1rem;
+main.container {
+  max-width: 1200px;
+  width: 90%;
+  margin: 4rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
 }
 
-.admin-section input[type="text"],
-.admin-section input[type="password"] {
-    width: 100%;
-    padding: 0.6rem;
-    margin-bottom: 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 1.1rem;
+.panel {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeIn 0.6s ease;
 }
 
-.admin-section button {
-    padding: 0.7rem 1.2rem;
-    margin-top: 0.5rem;
+.panel.small { padding: 1.5rem; }
+
+.panel h1, .panel h2 { margin: 0; color: #222; font-weight: 700; }
+
+.panel p.lead { font-size: 1rem; color: #555; }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
 }
 
-.admin-section ul {
-    list-style: none;
-    padding: 0;
+.controls input,
+.controls select {
+  padding: 0.7rem 1rem;
+  border: 1.5px solid #ccd6e0;
+  border-radius: 8px;
+  background: #f9fafc;
+  font-size: 0.95rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-.admin-section ul li {
-    background: #f8f8f8;
-    margin-bottom: 0.5rem;
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.controls input:focus,
+.controls select:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 8px rgba(74, 144, 226, 0.25);
 }
 
-.admin-section ul li button {
-    background-color: #c0392b;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-    color: #fff;
-    border-radius: 6px;
+.controls button {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #4a90e2, #357ABD);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.admin-section ul li button:hover {
-    background-color: #e74c3c;
+.controls button:hover {
+  background: linear-gradient(135deg, #357ABD, #2b6db4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(74, 144, 226, 0.4);
 }
 
-.admin-noticias .noticia-mini {
-    height: auto;
+.controls button:active { transform: translateY(0); box-shadow: none; }
+
+.counts {
+  font-weight: 600;
+  color: #4a90e2;
+  position: relative;
 }
 
-.admin-noticias .noticia-mini p {
-    padding: 0 0.5rem 0.5rem 0.5rem;
-    font-size: 0.9rem;
-    color: #333;
+.message {
+  background: #f0f4ff;
+  color: #333;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  animation: fadeIn 0.4s ease;
 }
 
-.admin-noticias .noticia-mini button {
-    background-color: #c0392b;
-    margin: 0.5rem;
+.table-wrap { overflow-x: auto; }
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 650px;
 }
 
-.admin-noticias .noticia-mini button:hover {
-    background-color: #e74c3c;
+.users-table th,
+.users-table td {
+  text-align: left;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.95rem;
 }
 
-@media screen and (max-width: 900px) {
-    .admin-dashboard {
-        grid-template-columns: 1fr;
-    }
+.users-table th {
+  background: #f4f6fb;
+  color: #333;
+  font-weight: 600;
 }
+
+.users-table tbody tr:hover { background: #f0f4ff; }
+
+.users-table tbody td button {
+  padding: 0.45rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+/* === Colores interactivos para botones === */
+.btn-promote {
+  background: linear-gradient(135deg, #28a745, #218838);
+}
+.btn-promote:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+}
+
+.btn-demote {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+}
+.btn-demote:hover {
+  background: linear-gradient(135deg, #5a6268, #495057);
+}
+
+.btn-ban {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+}
+.btn-ban:hover {
+  background: linear-gradient(135deg, #c82333, #a71d2a);
+}
+
+.btn-unban {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+}
+.btn-unban:hover {
+  background: linear-gradient(135deg, #138496, #117a8b);
+}
+
+.btn-access {
+  background: linear-gradient(135deg, #ffc107, #e0a800);
+  color: #222;
+}
+.btn-access:hover {
+  background: linear-gradient(135deg, #e0a800, #c69500);
+}
+
+.btn-remove-access {
+  background: linear-gradient(135deg, #6f42c1, #593196);
+}
+.btn-remove-access:hover {
+  background: linear-gradient(135deg, #593196, #452c84);
+}
+
+/* === Animaciones suaves === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === Sección noticias === */
+#newsList {
+  padding: 1rem;
+  background: #f0f4f8;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* === Adaptación responsive === */
+@media (max-width: 900px) {
+  .controls { flex-direction: column; align-items: stretch; }
+  .controls input, .controls select, .controls button { width: 100%; }
+  main.container { margin: 2rem auto; width: 95%; }
+  .users-table { min-width: 100%; }
+}
+/* ===== Botones del panel admin (estilo de la imagen) ===== */
+/* ===== ESTILOS DE LOS BOTONES DEL PANEL ===== */
+
+.btn-view,
+.btn-edit,
+.btn-delete {
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  font-family: inherit;
+}
+
+.btn-view {
+  background-color: #f2f2f2;
+  color: #000;
+}
+
+.btn-edit {
+  background-color: #FFD633;
+  color: #000;
+}
+
+.btn-delete {
+  background-color: #E74C3C;
+  color: #fff;
+}
+
+.btn-view:hover,
+.btn-edit:hover,
+.btn-delete:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
