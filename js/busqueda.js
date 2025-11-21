@@ -20,11 +20,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   cont.innerHTML = `<p class="cargando">Buscando resultados...</p>`;
 
   try {
-    const res = await fetch("../date/noticias.json", { cache: "no-store" });
-    if (!res.ok) throw new Error("No se pudo cargar noticias.json");
+    // Usar API de noticias en lugar de archivo estático
+    const res = await fetch("../php/api_noticias.php?action=obtener&limite=500", { 
+      cache: "no-store",
+      credentials: 'same-origin'
+    });
+    if (!res.ok) throw new Error("No se pudo cargar noticias desde API (HTTP " + res.status + ")");
 
     let noticias = await res.json();
-    if (!Array.isArray(noticias)) throw new Error("Formato inválido de noticias.json");
+    if (!Array.isArray(noticias)) throw new Error("Formato inválido de respuesta de API");
 
     // Aplicar filtros
     const resultados = noticias.filter(n => {

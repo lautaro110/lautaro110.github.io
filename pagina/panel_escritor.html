@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-   <link rel="icon" type="image/png" href="../img/logo-tecnica.png">
+  <link rel="icon" type="image/png" href="../img_logo/logo-tecnica.png">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Panel del Escritor</title>
@@ -13,16 +13,27 @@
   <link rel="stylesheet" href="../css/calendario.css">
 
   <!-- Scripts -->
+  <script>
+    // Stub para evitar condiciones de carrera: encola llamadas a cargarEventos
+    (function(){
+      if (!window._calendario_queue) window._calendario_queue = [];
+      if (!window.cargarEventos) {
+        window.cargarEventos = function(mine){ window._calendario_queue.push(!!mine); };
+      }
+    })();
+  </script>
   <script src="../js/navbar.js" defer></script>
   <script src="../js/login.js" defer></script>
   <script src="../js/panel_escritor.js" defer></script>
+  <script src="../js/editor-enhancements.js" defer></script>
+  <script src="../js/editor-enhancements.js" defer></script>
   <script src="../js/calendario.js" defer></script>
 </head>
 
 <body>
 <header class="navegador">
   <div class="logo">
-    <h1><a href="../index.html">Escuela Técnica - La Plata</a></h1>
+    <h1><a href="../index.html">E.E.S.T. Nro 5 - "Gral. Manuel N. Savio</a></h1>
   </div>
   <div class="buscador oculto">
     <input type="text" id="buscarNoticias" placeholder="Buscar noticias...">
@@ -40,7 +51,8 @@
     <h2>🖋️ Crear Nueva Noticia</h2>
     <div id="mensajeContainer"></div>
 
-    <form id="formNoticia" enctype="multipart/form-data" autocomplete="off">
+    <!-- SIN onsubmit, que lo maneje panel_escritor.js -->
+    <form id="formNoticia">
       <label for="tituloNoticia">Título de la noticia</label>
       <input type="text" id="tituloNoticia" name="titulo" placeholder="Ej: Jornada de Puertas Abiertas" required>
 
@@ -48,8 +60,16 @@
       <input type="hidden" id="fechaNoticia" name="fecha">
 
       <label for="imagenNoticia">Imagen destacada (opcional)</label>
+      <!-- Debe tener type="file" (NO type="text") -->
       <input type="file" id="imagenNoticia" name="imagen" accept="image/*">
-      <img id="previewImagen" alt="Vista previa" style="display:none; max-width:200px; margin:10px 0; border-radius:10px; box-shadow:0 0 6px rgba(0,0,0,0.2);">
+      <img id="previewImagen" alt="Vista previa">
+
+      <!-- Tipo de noticia: principal o secundaria -->
+      <div class="tipo-noticia-control" style="margin:10px 0;">
+        <label style="display:block; font-weight:600; margin-bottom:6px;">Tipo de noticia</label>
+        <label style="margin-right:12px;"><input type="radio" name="tipoNoticia" value="principal"> Principal</label>
+        <label><input type="radio" name="tipoNoticia" value="secundaria" checked> Secundaria</label>
+      </div>
 
       <div class="editor-toolbar" role="toolbar" aria-label="Barra de herramientas de edición">
         <button type="button" data-cmd="bold" title="Negrita"><b>B</b></button>
@@ -74,6 +94,22 @@
       </div>
 
       <div id="editor" class="editor" contenteditable="true" placeholder="Escribe el contenido de la noticia aquí..." aria-label="Editor de contenido"></div>
+
+      <div style="background: #f0f8ff; padding: 10px; border-radius: 6px; margin-bottom: 1rem; font-size: 0.95rem; color: #333;">
+        <strong>💡 Ayuda rápida — ¿Qué hace cada control?</strong>
+        <ul style="margin: 8px 0; padding-left: 20px;">
+          <li><strong>B</strong>: Aplica <em>negrita</em> al texto seleccionado.</li>
+          <li><strong>I</strong>: Aplica <em>cursiva</em> al texto seleccionado.</li>
+          <li><strong>U</strong>: Aplica <em>subrayado</em> al texto seleccionado.</li>
+          <li><strong>Tamaño</strong>: Cambia el tamaño del texto seleccionado. Si hay una imagen seleccionada, ajusta el <em>ancho</em> de la imagen (25% / 50% / 75% / 100%).</li>
+          <li><strong>⟸</strong>: Alinea a la <em>izquierda</em>. Si tienes una imagen seleccionada, la sitúa a la izquierda y el texto la rodea.</li>
+          <li><strong>≡</strong>: Centra. Si tienes una imagen seleccionada, la centra dentro del contenedor.</li>
+          <li><strong>⟹</strong>: Alinea a la <em>derecha</em>. Si tienes una imagen seleccionada, la sitúa a la derecha y el texto la rodea.</li>
+          <li><strong>🔗</strong>: Insertar enlace: selecciona texto y pulsa para añadir una URL.</li>
+          <li><strong>🖼️</strong>: Insertar imagen desde tu dispositivo. Haz clic en la imagen para seleccionarla (se resaltará en azul), y luego usa los botones de alineación o el selector de tamaño para moverla o cambiar su ancho.</li>
+        </ul>
+        <div style="margin-top:6px;color:#555;font-size:0.88rem">Consejo: Para mover una imagen primero haz <strong>clic</strong> sobre ella (verás un borde azul), luego pulsa el botón de la barra para colocarla a la izquierda/derecha/centro o usa el selector de tamaño para ajustar su ancho.</div>
+      </div>
 
       <div class="botones-editor">
         <button type="submit" class="btn-primario">📢 Publicar Noticia</button>
@@ -141,5 +177,21 @@
 </main>
 
 <footer>© 2025 Escuela Técnica - La Plata</footer>
+
+<!-- El script de manejo del formulario está en ../js/panel_escritor.js -->
+<script>
+  // Si queremos que en la sección "Eventos existentes" se muestren solo los eventos subidos por el usuario
+  // llamamos a la función global `cargarEventos(true)` que fue exportada por `js/calendario.js`.
+  document.addEventListener('DOMContentLoaded', function() {
+    try {
+      if (window.cargarEventos) {
+        // cargar solo los eventos del usuario en sesión
+        window.cargarEventos(true);
+      }
+    } catch (e) {
+      console.error('No se pudo cargar eventos con filtro mine:', e);
+    }
+  });
+</script>
 </body>
 </html>

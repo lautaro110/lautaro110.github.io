@@ -50,6 +50,68 @@ textarea {
   transition: border-color 0.3s;
 }
 
+/* Preview de imagen (vista previa en el formulario) */
+#previewImagen {
+  display: none;
+  width: 100%;
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  border-radius: 8px;
+  margin: 10px 0;
+  background: #000; /* caja negra de fondo */
+  padding: 6px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* Asegurar que las imágenes dentro del editor no se salgan del contenedor */
+.editor img {
+  max-width: 60%;
+  max-height: 350px;
+  width: auto;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  margin: 1rem auto;
+  object-fit: contain;
+  cursor: auto; /* cursor normal, no mano */
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: auto;
+}
+
+.editor img:active {
+  cursor: auto;
+}
+
+/* Imagen seleccionada (resaltar) */
+.editor img.selected-image {
+  outline: 3px solid #2b7be4;
+  box-shadow: 0 6px 18px rgba(43,123,228,0.18);
+}
+
+/* Permitir imágenes flotantes a la izquierda */
+.editor img.float-left {
+  float: left;
+  margin: 0.5rem 1rem 0.5rem 0;
+  max-width: 45%;
+}
+
+/* Permitir imágenes flotantes a la derecha */
+.editor img.float-right {
+  float: right;
+  margin: 0.5rem 0 0.5rem 1rem;
+  max-width: 45%;
+}
+
+/* Limpiar floats en el editor para que el texto rodee las imágenes correctamente */
+.editor::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
 .editor-container input:focus,
 .calendario-container input:focus,
 .calendario-container select:focus,
@@ -157,6 +219,54 @@ button:hover {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1rem;
+}
+
+/* Nuevo: estilo para noticias en formato completo del escritor */
+.noticia-full {
+  display: block;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.noticia-full h4 { margin: 0 0 8px 0; color: #0b3b66; }
+.noticia-full .noticia-imagen img { width: 100%; height: auto; max-height: 420px; object-fit: cover; border-radius: 6px; }
+.noticia-full .noticia-contenido { margin-top: 12px; color: #222; line-height: 1.65; }
+.noticia-full .noticia-contenido img { max-width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+/* Evitar que palabras largas o contenido salgan del contenedor */
+.noticia-full .noticia-contenido,
+.noticia-full .noticia-contenido p,
+.noticia-full .noticia-contenido span,
+.noticia-full .noticia-contenido div,
+.news-excerpt,
+.news-title { 
+  word-break: break-word; 
+  overflow-wrap: anywhere; 
+  white-space: normal; 
+}
+
+/* Estilizar acciones: evitar que botones se salgan del contenedor y uniformar tamaños */
+.noticia-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.noticia-actions .btn-view,
+.noticia-actions .btn-edit,
+.noticia-actions .btn-delete,
+.btn-view,
+.btn-edit,
+.btn-delete { min-width: 86px; padding: 6px 10px; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; }
+.btn-view { background: #007bff; color: #fff; }
+.btn-edit { background: #ffc107; color: #000; }
+.btn-delete { background: #dc3545; color: #fff; }
+.noticia-actions .btn-view:hover { background:#0062cc; }
+.noticia-actions .btn-edit:hover { background:#e0a800; }
+.noticia-actions .btn-delete:hover { background:#c82333; }
+
+/* Hacer que en pantalla chica el listado sea columna única y el contenido ocupe todo */
+@media (max-width: 768px) {
+  .noticias-grid { grid-template-columns: 1fr; }
+  .noticia-full { padding: 12px; }
 }
 
 .placeholder {

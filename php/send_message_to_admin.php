@@ -11,12 +11,18 @@ session_start();
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 header('Content-Type: application/json; charset=utf-8');
 
+// === VERIFICAR SESIÓN ===
+$user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
+if (!$user_id) {
+    echo json_encode(['status'=>'error','message'=>'No autenticado']);
+    exit;
+}
+
 // === CONFIGURABLE ===
 define('MAX_MESSAGES_PER_DAY', 3);
 
 // === CONEXIÓN A BD ===
 require_once __DIR__ . '/../conexion.php'; // crea $conn (mysqli)
-
 if (!isset($conn) || !($conn instanceof mysqli)) {
     http_response_code(500);
     echo json_encode(['status'=>'error','message'=>'Conexión DB no inicializada']);
@@ -38,15 +44,9 @@ $conn->query("CREATE TABLE IF NOT EXISTS messages_to_admin (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
 // === DATOS DE ENTRADA ===
-$user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
 $subject = isset($_POST['subject']) ? trim($_POST['subject']) : null;
 $message = isset($_POST['message']) ? trim($_POST['message']) : '';
 $ip      = $_SERVER['REMOTE_ADDR'] ?? null;
-
-// Para anónimos: generar una clave única por sesión
-$session_id = session_id();
-$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-$anon_key = $user_id ? null : substr(hash('sha256', $session_id . '|' . $ip . '|' . $user_agent), 0, 64);
 
 // === VALIDACIONES ===
 if (mb_strlen($message) < 3) {
@@ -59,13 +59,8 @@ if ($subject !== null && mb_strlen($subject) > 200) {
 
 // === CÁLCULO DE LÍMITE ===
 $since = date('Y-m-d H:i:s', time() - 86400);
-if ($user_id) {
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM messages_to_admin WHERE user_id = ? AND created_at >= ?");
-    $stmt->bind_param('is', $user_id, $since);
-} else {
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM messages_to_admin WHERE anon_key = ? AND created_at >= ?");
-    $stmt->bind_param('ss', $anon_key, $since);
-}
+$stmt = $conn->prepare("SELECT COUNT(*) FROM messages_to_admin WHERE user_id = ? AND created_at >= ?");
+$stmt->bind_param('is', $user_id, $since);
 $stmt->execute();
 $stmt->bind_result($cnt);
 $stmt->fetch();
@@ -77,13 +72,8 @@ if (intval($cnt) >= MAX_MESSAGES_PER_DAY) {
 }
 
 // === INSERTAR MENSAJE ===
-if ($user_id) {
-    $stmt = $conn->prepare("INSERT INTO messages_to_admin (user_id, subject, message, ip) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param('isss', $user_id, $subject, $message, $ip);
-} else {
-    $stmt = $conn->prepare("INSERT INTO messages_to_admin (anon_key, subject, message, ip) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param('ssss', $anon_key, $subject, $message, $ip);
-}
+$stmt = $conn->prepare("INSERT INTO messages_to_admin (user_id, subject, message, ip) VALUES (?, ?, ?, ?)");
+$stmt->bind_param('isss', $user_id, $subject, $message, $ip);
 if (!$stmt->execute()) {
     http_response_code(500);
     echo json_encode(['status'=>'error','message'=>'No se pudo guardar el mensaje.']);

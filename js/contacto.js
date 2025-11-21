@@ -39,7 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (res.ok) form.reset();
       } else {
-        if (resultEl) {
+        // Mostrar mensaje especial si no está autenticado
+        if (data.message && (data.message.includes('No autenticado') || data.message.includes('Conexión DB no inicializada'))) {
+          resultEl.textContent = 'Inicie sesión para enviar mensajes.';
+          resultEl.style.color = 'red';
+        } else {
           resultEl.textContent = data.message || (data.status === 'ok' ? 'Enviado correctamente' : 'Ocurrió un error');
           resultEl.style.color = (data.status === 'ok' || data.status === 'success') ? 'green' : 'red';
         }

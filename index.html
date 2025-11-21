@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    <link rel="icon" type="image/png" href="img/logo-tecnica.png">
+  <link rel="icon" type="image/png" href="img_logo/logo-tecnica.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Escuela Técnica - Inicio</title>
@@ -17,19 +18,26 @@
   <script src="js/index_noticias.js" defer></script>
   <script src="js/calendario_flotante.js" defer></script>
 </head>
+
 <body>
 
   <!-- HEADER / NAVBAR -->
   <header class="navegador">
+    <!-- FILA 1: LOGO CON IMÁGENES A LOS LADOS -->
     <div class="logo">
-      <h1><a href="index.html">Escuela Técnica - La Plata</a></h1>
+      <div class="logo-container">
+        <img src="img_logo/logo-tecnica.png" alt="E.E.S.T. Nro 5" class="logo-img logo-left">
+        <h1>
+          <a href="index.html">E.E.S.T. Nro 5 - "Gral. Manuel N. Savio"</a>
+        </h1>
+      </div>
     </div>
 
-    <div class="buscador">
+    <!-- <div class="buscador">
       <input type="text" id="buscarNoticias" placeholder="Buscar noticias..." />
       <button id="btnBuscar">🔍</button>
     </div>
-
+     -->
     <nav id="navPrincipal" class="navbar"></nav>
   </header>
 
@@ -41,7 +49,7 @@
   <!-- GRID DE NOTICIAS -->
   <main>
     <h2>Últimas Noticias</h2>
-    <div id="noticiasContainer" class="noticias-grid"></div>
+    <div id="noticiasContainer"></div>
   </main>
 
   <!-- FOOTER -->
@@ -60,4 +68,5 @@
   </div>
 
 </body>
+
 </html>

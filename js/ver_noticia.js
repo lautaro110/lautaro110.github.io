@@ -41,17 +41,103 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const imgSrc = noticia.imagen
-      ? `../${noticia.imagen}?v=${Date.now()}`
-      : "../img/sin_imagen.png";
+    // Normalizar ruta de imagen: soportar rutas absolutas, relativas y paths desde PHP
+    let imgSrc;
+    const fallback = (typeof getBasePath === 'function' && typeof normalizarRuta === 'function') ? normalizarRuta(getBasePath() + 'img/sin_imagen.png') : '../img/sin_imagen.png';
+    try {
+      if (noticia.imagen && String(noticia.imagen).trim() !== '') {
+        if (typeof normalizarRuta === 'function' && typeof getBasePath === 'function') {
+          imgSrc = noticia.imagen.startsWith('/') ? normalizarRuta(noticia.imagen) : normalizarRuta(getBasePath() + noticia.imagen);
+        } else {
+          imgSrc = noticia.imagen.startsWith('/') ? noticia.imagen : `../${noticia.imagen}`;
+        }
+        // Cache-busting
+        imgSrc += (imgSrc.includes('?') ? '&' : '?') + 'v=' + Date.now();
+      } else {
+        imgSrc = fallback;
+      }
+    } catch (e) {
+      console.warn('[ver_noticia] Error resolviendo imagen:', e);
+      imgSrc = fallback;
+    }
+    
+    // Obtener autor usando utilidades compartidas si están disponibles
+    let autorNombre = 'Anónimo';
+    let autorFoto = (typeof getBasePath === 'function' ? normalizarRuta(getBasePath() + 'img_logo/logo-tecnica.png') : "../img_logo/logo-tecnica.png");
+    
+    if (typeof obtenerAutorNombre === 'function' && typeof obtenerAutorFoto === 'function') {
+      try {
+        autorNombre = obtenerAutorNombre(noticia);
+        autorFoto = obtenerAutorFoto(noticia);
+      } catch (e) {
+        console.warn('Error usando utilidades del navbar en ver_noticia:', e);
+        autorNombre = noticia.autor_nombre || noticia.nombre || 'Anónimo';
+        if (noticia.imagen_perfil) {
+          try {
+            // Evitar duplicar rutas: si comienza con /, usarla directamente
+            if (noticia.imagen_perfil.startsWith('/')) {
+              if (typeof normalizarRuta === 'function') {
+                autorFoto = normalizarRuta(noticia.imagen_perfil);
+              } else {
+                autorFoto = noticia.imagen_perfil;
+              }
+            } else if (typeof getBasePath === 'function' && typeof normalizarRuta === 'function') {
+              autorFoto = normalizarRuta(getBasePath() + noticia.imagen_perfil);
+            } else {
+              autorFoto = `../img/perfiles/${noticia.imagen_perfil}`;
+            }
+          } catch (e2) {
+            autorFoto = `../img/perfiles/${noticia.imagen_perfil}`;
+          }
+        }
+      }
+    } else {
+      autorNombre = noticia.autor_nombre || noticia.nombre || 'Anónimo';
+      if (noticia.imagen_perfil) {
+        try {
+          // Evitar duplicar rutas: si comienza con /, usarla directamente
+          if (noticia.imagen_perfil.startsWith('/')) {
+            if (typeof normalizarRuta === 'function') {
+              autorFoto = normalizarRuta(noticia.imagen_perfil);
+            } else {
+              autorFoto = noticia.imagen_perfil;
+            }
+          } else if (typeof getBasePath === 'function' && typeof normalizarRuta === 'function') {
+            autorFoto = normalizarRuta(getBasePath() + noticia.imagen_perfil);
+          } else {
+            autorFoto = `../img/perfiles/${noticia.imagen_perfil}`;
+          }
+        } catch (e) {
+          autorFoto = `../img/perfiles/${noticia.imagen_perfil}`;
+        }
+      }
+    }
+
+    // Función util: eliminar etiquetas <img> del contenido HTML para mostrar solo texto
+    function stripImagesFromHtml(html) {
+      if (!html) return '';
+      try {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        doc.querySelectorAll('img').forEach(i => i.remove());
+        return doc.body.innerHTML;
+      } catch (e) {
+        // fallback: eliminar tags <img> con regex
+        return html.replace(/<img[^>]*>/gi, '');
+      }
+    }
+
+    const contenidoHtml = (noticia.contenido || '');
 
     contenedor.innerHTML = `
       <h1>${noticia.titulo}</h1>
-      <p class="autor">Por ${noticia.autor} | ${noticia.fecha}</p>
+      <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
+        <img src="${autorFoto}" alt="${autorNombre}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+        <p class="autor">Por ${autorNombre} | ${noticia.fecha}</p>
+      </div>
       <div class="imagen-wrapper">
         <img src="${imgSrc}" alt="Portada" class="imagen-noticia">
       </div>
-      <div class="contenido">${noticia.contenido}</div>
+      <div class="contenido">${contenidoHtml}</div>
     `;
 
     const imagen = contenedor.querySelector(".imagen-noticia");

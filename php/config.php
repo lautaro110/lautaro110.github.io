@@ -23,38 +23,126 @@ if (file_exists($envFile)) {
 // -----------------------------------------------------
 //  CONFIGURACIÓN GOOGLE API
 // -----------------------------------------------------
-require_once __DIR__ . '/../vendor/autoload.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', 'C:/xampp/php/logs/php_error.log');
 
-$client = new Google_Client();
+// cargar vendor/autoload solo si existe
+$autoload = __DIR__ . '/../vendor/autoload.php';
+if (file_exists($autoload)) {
+    require_once $autoload;
+} else {
+    file_put_contents(__DIR__ . '/debug_log.txt', '['.date('Y-m-d H:i:s').'] vendor/autoload.php no encontrado. Continuando.' . PHP_EOL, FILE_APPEND);
+}
 
-// Datos de Google API
-$client->setClientId("475324951083-lp2pvqi80vs95cshsij7hn5m8tg3b0s3.apps.googleusercontent.com");
-$client->setClientSecret("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");
-$client->setRedirectUri("http://localhost/web-escolar/php/login_google.php");
-
-// Scopes para obtener datos básicos del usuario
-$client->addScope("email");
-$client->addScope("profile");
-
-// -----------------------------------------------------
-//  CONFIGURACIÓN BASE DE DATOS
-// -----------------------------------------------------
+// conexión DB
 $host = 'localhost';
-$db   = 'web_escolar';
-$user = 'root';
-$pass = ''; // Si tu XAMPP tiene contraseña de root, colócala aquí
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-];
+$usuario = 'root';
+$contrasena = '';
+$base_datos = 'web_escolar';
 
 try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (\PDOException $e) {
-    echo "Error de conexión: " . $e->getMessage();
-    exit();
+    $conexion = new mysqli($host, $usuario, $contrasena, $base_datos);
+    
+    if ($conexion->connect_error) {
+        throw new Exception("Error de conexión: " . $conexion->connect_error);
+    }
+    
+    $conexion->set_charset("utf8mb4");
+    
+} catch (Exception $e) {
+    error_log("Error de conexión DB: " . $e->getMessage());
+    die(json_encode([
+        'success' => false,
+        'message' => 'Error de conexión con la base de datos'
+    ]));
 }
+
+// no instanciar Google_Client si no existe
+if (!class_exists('Google_Client')) {
+    file_put_contents(__DIR__ . '/debug_log.txt', '['.date('Y-m-d H:i:s').'] Google_Client no disponible.' . PHP_EOL, FILE_APPEND);
+}
+
+function logError($mensaje) {
+    file_put_contents(__DIR__ . '/debug_log.txt', '['.date('Y-m-d H:i:s').'] ' . $mensaje . PHP_EOL, FILE_APPEND);
+}
+
+// --- CONFIGURACIÓN BASE DE DATOS ---
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'web_escolar');
+
+try {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    
+    if ($conn->connect_error) {
+        throw new Exception("Error de conexión: " . $conn->connect_error);
+    }
+
+    $conn->set_charset("utf8mb4");
+    
+} catch (Exception $e) {
+    error_log("Error de conexión: " . $e->getMessage());
+    die(json_encode([
+        'success' => false,
+        'message' => 'Error de conexión a la base de datos'
+    ]));
+}
+
+// --- CREACIÓN DE TABLAS ---
+// Ejecuta esto en phpMyAdmin
+/*
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    correo VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    tipo_cuenta VARCHAR(20) DEFAULT 'manual',
+    foto LONGTEXT,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+*/
+
+// filepath: c:\xampp\htdocs\web-escolar\php\config.php
+// 
+// Configuración centralizada de BD
+// Protegida contra múltiples includes
+//
+
+// ========== CREDENCIALES DE BD (solo si no están definidas) ==========
+if (!defined('DB_HOST')) define('DB_HOST', 'localhost');
+if (!defined('DB_USER')) define('DB_USER', 'root');
+if (!defined('DB_PASS')) define('DB_PASS', '');
+if (!defined('DB_NAME')) define('DB_NAME', 'web_escolar');
+
+// ========== CREAR CONEXIÓN MySQLi (solo si no existe) ==========
+if (!isset($GLOBALS['mysqli'])) {
+    $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    
+    // Chequear conexión
+    if ($mysqli->connect_error) {
+        error_log("Error conexión BD: " . $mysqli->connect_error);
+        $mysqli = null;
+    } else {
+        // Charset UTF-8
+        $mysqli->set_charset("utf8mb4");
+        // Guardar en global para que otros includes la usen
+        $GLOBALS['mysqli'] = $mysqli;
+    }
+} else {
+    // Ya existe conexión, usarla
+    $mysqli = $GLOBALS['mysqli'];
+}
+
+// ========== VARIABLES DE SESIÓN (compartidas con login/usuarios) ==========
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$loggedIn = isset($_SESSION['user_id']);
+$userId = $_SESSION['user_id'] ?? null;
+$userEmail = $_SESSION['user_email'] ?? null;
+
 ?>

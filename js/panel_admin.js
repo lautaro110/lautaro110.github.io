@@ -5,19 +5,24 @@
 (function () {
   const $ = s => document.querySelector(s);
 
+  console.log('panel_admin.js cargado');
+
   // ===============================
   // Cargar usuarios desde PHP (usuarios.php)
   // ===============================
   async function fetchUsuarios() {
-    try {
-      const res = await fetch("../date/usuarios.php", { cache: "no-store" });
-      if (!res.ok) throw new Error("No se pudo cargar usuarios.json");
-      return await res.json();
-    } catch (e) {
-      console.error("Error cargando usuarios:", e);
-      return [];
-    }
+  console.log('fetchUsuarios: llamando a obtener_usuarios.php');
+  const resp = await fetch('../php/admin/obtener_usuarios.php', { credentials: 'same-origin' });
+  const text = await resp.text();
+  console.log('fetchUsuarios: respuesta cruda:', text.slice(0,1000));
+  try {
+    const data = JSON.parse(text);
+    return data;
+  } catch (e) {
+    console.error('fetchUsuarios: respuesta no es JSON', text);
+    throw new Error('Respuesta inválida del servidor al cargar usuarios. Ver consola Network/Response.');
   }
+}
 
   let users = [];
   let noticias = [];
@@ -29,7 +34,22 @@
   // ===============================
   async function init() {
     bindUI();
-    users = await fetchUsuarios();
+    try {
+      const dataUsuarios = await fetchUsuarios();
+      // La respuesta es {success, usuarios: [...], message} o {error}
+      if (dataUsuarios.error) {
+        console.error('Error al obtener usuarios:', dataUsuarios.error);
+        users = [];
+      } else if (dataUsuarios.usuarios && Array.isArray(dataUsuarios.usuarios)) {
+        users = dataUsuarios.usuarios;
+      } else {
+        console.warn('Respuesta inesperada de fetchUsuarios:', dataUsuarios);
+        users = [];
+      }
+    } catch (err) {
+      console.error('Exception al obtener usuarios:', err);
+      users = [];
+    }
     renderAll();
     await fetchNoticias(); // carga noticias al iniciar
   }
@@ -41,7 +61,23 @@
     $("#search").addEventListener("input", renderAll);
     $("#filterRole").addEventListener("change", renderAll);
     $("#reload").addEventListener("click", async () => {
-      users = await fetchUsuarios();
+      document.getElementById('search').value = '';
+      document.getElementById('filterRole').value = 'all';
+      try {
+          const dataUsuarios = await fetchUsuarios();
+          if (dataUsuarios.error) {
+              console.error('Error al obtener usuarios:', dataUsuarios.error);
+              users = [];
+          } else if (dataUsuarios.usuarios && Array.isArray(dataUsuarios.usuarios)) {
+              users = dataUsuarios.usuarios;
+          } else {
+              console.warn('Respuesta inesperada de fetchUsuarios:', dataUsuarios);
+              users = [];
+          }
+      } catch (err) {
+          console.error('Exception al obtener usuarios:', err);
+          users = [];
+      }
       renderAll();
     });
   }
@@ -73,59 +109,75 @@
   // Render tabla de usuarios
   // ===============================
   function renderUsersTable() {
-    const q = $("#search").value.trim().toLowerCase();
-    const roleFilter = $("#filterRole").value;
+    const tabla = document.querySelector('#usuarios-tbody');
+    if (!tabla) return;
 
-    const list = users.filter(u => {
-      if (u.rol === "admin") return false;
-      if (roleFilter !== "all" && u.rol !== roleFilter) return false;
-      if (!q) return true;
-      const username = (u.nombre || u.username || "").toLowerCase();
-      const email = (u.correo || u.email || "").toLowerCase();
-      return username.includes(q) || email.includes(q);
+    // Obtener filtros
+    const searchValue = (document.getElementById('search')?.value || '').toLowerCase();
+    const roleValue = (document.getElementById('filterRole')?.value || 'all');
+
+    // Filtrar usuarios
+    let filtered = users;
+    if (searchValue) {
+        filtered = filtered.filter(u =>
+            (u.nombre && u.nombre.toLowerCase().includes(searchValue)) ||
+            (u.correo && u.correo.toLowerCase().includes(searchValue))
+        );
+    }
+    if (roleValue !== 'all') {
+        filtered = filtered.filter(u => u.rol === roleValue);
+    }
+
+    tabla.innerHTML = filtered.map(user => `
+      <tr>
+        <td>${escapeHtml(user.nombre)}</td>
+        <td>${escapeHtml(user.correo)}</td>
+        <td class="td-rol">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button class="btn-role" data-user-id="${escapeHtml(user.id)}">${escapeHtml((user.rol||'usuario').charAt(0).toUpperCase() + (user.rol||'usuario').slice(1))}</button>
+            <span class="inline-msg-placeholder" aria-live="polite"></span>
+          </div>
+        </td>
+        <td>${new Date(user.fecha_registro).toLocaleDateString()}</td>
+      </tr>
+    `).join('');
+
+    // Después de insertar filas, enlazar handlers a los botones de rol
+
+    // Botones de rol: un único botón por fila que muestra el rol y actúa como toggle
+    const roleBtns = document.querySelectorAll('.btn-role');
+    roleBtns.forEach(b => {
+      b.addEventListener('click', async function () {
+        const userId = this.dataset.userId;
+        const cell = this.closest('td');
+        const user = users.find(u => String(u.id) === String(userId));
+        const currentRole = user ? (user.rol || 'usuario') : 'usuario';
+        const newRole = currentRole === 'escritor' ? 'usuario' : 'escritor';
+        try {
+          const resp = await fetch('../php/admin/cambiar_rol.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario_id: userId, rol: newRole })
+          });
+          let data;
+          try { data = await resp.json(); } catch (e) { data = { success: resp.ok, message: await resp.text() }; }
+          const placeholder = cell.querySelector('.inline-msg-placeholder');
+          if (data && data.success) {
+            if (user) user.rol = newRole;
+            // actualizar texto del botón
+            this.textContent = newRole.charAt(0).toUpperCase() + newRole.slice(1);
+            showRowMessage(placeholder, data.message || `Rol cambiado a ${newRole}.`);
+            renderCounts();
+          } else {
+            showRowMessage(placeholder, (data && data.message) || 'Error al actualizar rol', 'error');
+          }
+        } catch (e) {
+          console.error('Error actualizando rol:', e);
+          const placeholder = cell.querySelector('.inline-msg-placeholder');
+          showRowMessage(placeholder, 'Error de conexión', 'error');
+        }
+      });
     });
-
-    const tb = tbody();
-    tb.innerHTML = "";
-
-    if (list.length === 0) {
-      tb.innerHTML = `<tr><td colspan="5"><em>No hay usuarios disponibles</em></td></tr>`;
-      return;
-    }
-
-    for (const u of list) {
-      const tr = document.createElement("tr");
-      const username = escapeHtml(u.nombre || u.username || "Sin nombre");
-      const email = escapeHtml(u.correo || u.email || "");
-      const role = escapeHtml(u.rol || "usuario");
-      const calendar = !!u.calendar;
-
-      tr.innerHTML = `
-        <td>${username}</td>
-        <td>${email}</td>
-        <td>${role}</td>
-        <td>${calendar ? "Sí" : "No"}</td>
-        <td class="actions"></td>
-      `;
-
-      const actions = tr.querySelector(".actions");
-
-      const promoteBtn = document.createElement("button");
-      promoteBtn.className = u.rol === "escritor" ? "btn-demote" : "btn-promote";
-      promoteBtn.textContent = u.rol === "escritor" ? "Degradar a usuario" : "Ascender a escritor";
-      promoteBtn.addEventListener("click", () => toggleWriterRole(u));
-      actions.appendChild(promoteBtn);
-
-      if (u.rol === "escritor") {
-        const accessBtn = document.createElement("button");
-        accessBtn.className = calendar ? "btn-remove-access" : "btn-access";
-        accessBtn.textContent = calendar ? "Quitar acceso" : "Dar acceso";
-        accessBtn.addEventListener("click", () => toggleCalendar(u));
-        actions.appendChild(accessBtn);
-      }
-
-      tb.appendChild(tr);
-    }
   }
 
   async function sendPatch(user, patch) {
@@ -151,14 +203,36 @@
   }
 
   async function toggleWriterRole(user) {
-    const newRole = user.rol === "escritor" ? "usuario" : "escritor";
-    const ok = await sendPatch(user, { rol: newRole });
-    if (ok) {
-      user.rol = newRole;
-      showMessage(`${user.nombre} ahora es ${newRole}`);
-      renderAll();
+    try {
+      // aceptar que 'user' pueda ser un objeto o un id
+      const uid = (typeof user === 'object' && user && user.id) ? user.id : user;
+      if (!uid) throw new Error('Usuario inválido');
+      // Obtener rol actual desde el select si existe en DOM
+      const sel = document.querySelector(`select[data-user-id="${uid}"]`);
+      const currentRole = sel ? sel.value : (user.rol || 'usuario');
+      const newRole = currentRole === 'escritor' ? 'usuario' : 'escritor';
+
+      const response = await fetch('../php/admin/cambiar_rol.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario_id: uid, rol: newRole })
+      });
+
+      const data = await response.json();
+      if (data && data.success) {
+        mostrarNotificacion(data.message || `Rol actualizado a ${newRole}`, 'success');
+        // recargar usuarios
+        const fresh = await fetchUsuarios();
+        if (Array.isArray(fresh.usuarios)) users = fresh.usuarios;
+        renderAll();
+      } else {
+        mostrarNotificacion((data && data.message) || 'Error al actualizar rol', 'error');
+      }
+    } catch (error) {
+      mostrarNotificacion(error.message || 'Error desconocido', 'error');
+      console.error('Error:', error);
     }
-  }
+}
 
   async function toggleCalendar(user) {
     const newState = !user.calendar;
@@ -177,6 +251,51 @@
     el.textContent = msg;
     counts.appendChild(el);
     setTimeout(() => el.remove(), 3000);
+  }
+
+  // Mostrar mensaje pequeño inline dentro de la celda (debajo del botón/select)
+  function showInlineMessage(targetElementOrCell, msg, type = 'success', duration = 3000) {
+    try {
+      let cell = null;
+      if (!targetElementOrCell) return;
+      if (targetElementOrCell instanceof Element) {
+        // si pasaron la celda, usarla; si pasaron un botón o select, obtener su td
+        cell = targetElementOrCell.tagName.toLowerCase() === 'td' ? targetElementOrCell : targetElementOrCell.closest('td');
+      } else {
+        cell = document.querySelector(targetElementOrCell);
+      }
+      if (!cell) return;
+      // eliminar mensajes previos
+      const prev = cell.querySelector('.inline-msg');
+      if (prev) prev.remove();
+      const m = document.createElement('div');
+      m.className = 'inline-msg ' + (type === 'error' ? 'error' : 'ok');
+      m.textContent = msg;
+      cell.appendChild(m);
+      setTimeout(() => { m.remove(); }, duration);
+    } catch (e) {
+      console.error('showInlineMessage error', e);
+    }
+  }
+
+  // Mostrar mensaje al lado derecho del botón en la misma fila
+  function showRowMessage(placeholderElement, msg, type = 'ok', duration = 3000) {
+    try {
+      if (!placeholderElement) return;
+      // limpiar previo
+      placeholderElement.textContent = '';
+      placeholderElement.className = 'inline-msg-placeholder inline-msg ' + (type === 'error' ? 'error' : 'ok');
+      placeholderElement.textContent = msg;
+      // quitar después de un tiempo
+      setTimeout(() => {
+        if (placeholderElement) {
+          placeholderElement.textContent = '';
+          placeholderElement.className = 'inline-msg-placeholder';
+        }
+      }, duration);
+    } catch (e) {
+      console.error('showRowMessage error', e);
+    }
   }
 
   // ===============================
@@ -255,13 +374,77 @@
       const card = document.createElement("article");
       card.className = "noticia-mini";
 
-      const imagenRuta = n.imagen ? `../${n.imagen}` : "../date/img/default.jpg";
-      const textoPlano = (n.contenido || "").replace(/&nbsp;/g, " ").replace(/<\/?[^>]+(>|$)/g, "");
-      const extracto = textoPlano.length > 120 ? textoPlano.slice(0, 120) + "..." : textoPlano;
+      // Resolver ruta de imagen: soportar rutas absolutas (/web-escolar/...), rutas relativas (uploads/...) y PHP paths
+      let imagenRuta;
+      const fallbackImg = (typeof getBasePath === 'function' && typeof normalizarRuta === 'function') ? normalizarRuta(getBasePath() + 'date/img/default.jpg') : '../date/img/default.jpg';
+      try {
+        if (n.imagen && String(n.imagen).trim() !== '') {
+          if (typeof normalizarRuta === 'function' && typeof getBasePath === 'function') {
+            if (n.imagen.startsWith('/')) {
+              imagenRuta = normalizarRuta(n.imagen);
+            } else if (n.imagen.startsWith('php/') || n.imagen.startsWith('uploads/')) {
+              imagenRuta = normalizarRuta(getBasePath() + n.imagen);
+            } else {
+              imagenRuta = normalizarRuta(n.imagen);
+            }
+          } else {
+            imagenRuta = n.imagen.startsWith('/') ? n.imagen : `../${n.imagen}`;
+          }
+        } else {
+          imagenRuta = fallbackImg;
+        }
+      } catch (e) {
+        console.warn('[panel_admin] Error resolviendo imagen de noticia:', e);
+        imagenRuta = fallbackImg;
+      }
+      // Limpiar contenido: quitar <img> embebidas y data:URIs para evitar errores
+      function stripImagesFromHtml(html) {
+        if (!html) return '';
+        try {
+          // Remover regex patterns primero
+          let cleaned = html
+            .replace(/<img[^>]*>/gi, '')
+            .replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>.*?<\/div>/gi, '')
+            .replace(/data:[^\"'\s>]+/gi, '');
+          
+          // Extraer texto
+          const doc = new DOMParser().parseFromString(cleaned, 'text/html');
+          const text = (doc.body.textContent || doc.body.innerText || '')
+            .trim()
+            .replace(/\s+/g, ' ')
+            .substring(0, 120);
+          
+          return text || '';
+        } catch (e) {
+          return String(html)
+            .replace(/<img[^>]*>/gi, '')
+            .replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>.*?<\/div>/gi, '')
+            .replace(/data:[^\"'\s>]+/gi, '')
+            .replace(/<[^>]+>/g, '')
+            .trim()
+            .replace(/\s+/g, ' ')
+            .substring(0, 120);
+        }
+      }
+
+      function textFromHtml(html, maxLength = 120) {
+        if (!html) return '';
+        try {
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          const txt = doc.body.textContent || doc.body.innerText || '';
+          return txt.trim().substring(0, maxLength) + (txt.length > maxLength ? '...' : '');
+        } catch (e) {
+          const stripped = String(html).replace(/<[^>]+>/g, '');
+          return stripped.trim().substring(0, maxLength) + (stripped.length > maxLength ? '...' : '');
+        }
+      }
+
+      const safeHtml = stripImagesFromHtml(n.contenido || '');
+      const extracto = textFromHtml(safeHtml, 120);
 
       card.innerHTML = `
         <div style="width:100%;height:180px;overflow:hidden;">
-          <img src="${escapeHtml(imagenRuta)}" alt="${escapeHtml(n.titulo)}" style="width:100%;height:100%;object-fit:cover;">
+          <img src="${escapeHtml(imagenRuta)}" alt="${escapeHtml(n.titulo)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='${escapeHtml(fallbackImg)}';">
         </div>
         <div style="padding:12px;display:flex;flex-direction:column;gap:8px;">
           <h3 style="margin:0;color:#0b3b66;">${escapeHtml(n.titulo)}</h3>
@@ -307,6 +490,97 @@
     localStorage.setItem("idEditarNoticia", id);
     window.location.href = "../pagina/panel_escritor.html";
   }
+
+  // Función global para cambiar rol
+window.cambiarRol = async function(usuarioId, nuevoRolOrElement) {
+    try {
+        // admitir dos usos: (id, 'escritor') o (id, selectElement)
+        let nuevoRol = '';
+        if (typeof nuevoRolOrElement === 'string') {
+            nuevoRol = nuevoRolOrElement;
+        } else if (nuevoRolOrElement && nuevoRolOrElement.value !== undefined) {
+            nuevoRol = nuevoRolOrElement.value;
+        } else {
+            // intentar buscar el select por data-attribute
+            const sel = document.querySelector(`select[data-usuario-id="${usuarioId}"]`);
+            if (sel) nuevoRol = sel.value;
+        }
+
+        if (!usuarioId || !nuevoRol) {
+            console.error('Parametros invalidos', usuarioId, nuevoRol);
+            alert('Parámetros inválidos para cambiar el rol.');
+            return;
+        }
+
+        if (!confirm(`¿Confirmar cambio de rol a "${nuevoRol}" para el usuario ${usuarioId}?`)) return;
+
+        // preparar cuerpo x-www-form-urlencoded
+        const body = new URLSearchParams();
+        body.append('usuario_id', usuarioId);
+        body.append('nuevo_rol', nuevoRol);
+
+        console.log('Enviando cambiar_rol:', usuarioId, nuevoRol);
+
+        const resp = await fetch('../php/admin/cambiar_rol.php', {
+            method: 'POST',
+            credentials: 'same-origin', // enviar cookies de sesión
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            body: body.toString()
+        });
+
+        const text = await resp.text();
+        // debug: mostrar respuesta cruda si no es JSON
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('Respuesta no JSON de cambiar_rol.php:', text);
+            alert('Respuesta inválida del servidor. Revisa la consola (Network / Response).');
+            return;
+        }
+
+        if (data.success) {
+            mostrarNotificacion(data.message || 'Rol actualizado', 'success');
+            // recargar usuarios si existe la función
+            renderAll();
+        } else {
+            console.error('Error cambiarRol:', data);
+            mostrarNotificacion(data.message || 'Error al actualizar rol', 'error');
+        }
+    } catch (err) {
+        console.error('Error cambiarRol catch:', err);
+        mostrarNotificacion('Error al cambiar rol: ' + (err.message || err), 'error');
+    }
+};
+
+// Funciones auxiliares
+function escapeHtml(texto) {
+    const div = document.createElement('div');
+    div.textContent = texto;
+    return div.innerHTML;
+}
+
+function formatearFecha(fecha) {
+    return new Date(fecha).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+function mostrarNotificacion(mensaje, tipo) {
+    const notificacion = document.createElement('div');
+    notificacion.className = `notificacion ${tipo}`;
+    notificacion.textContent = mensaje;
+    document.body.appendChild(notificacion);
+    
+    setTimeout(() => {
+        notificacion.remove();
+    }, 3000);
+}
 
   document.addEventListener("DOMContentLoaded", init);
 })();

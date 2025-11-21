@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ===============================
-  // CRUD EVENTOS
+  // CRUD EVENTOS - Ahora usando BD
   // ===============================
   formEvento.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -128,36 +128,90 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (eventoEditando) {
-      // Modo edición
-      const index = eventos.findIndex((e) => e.id === eventoEditando);
-      if (index !== -1) {
-        eventos[index] = { ...eventos[index], fecha, titulo, tipo, descripcion, horaInicio, horaFin };
-      }
+      // Modo edición - actualizar en BD
+      await actualizarEventoBD(eventoEditando, {
+        fecha, titulo, tipo, descripcion, horaInicio, horaFin
+      });
       eventoEditando = null;
     } else {
-      // Nuevo evento
-      eventos.push({
-        id: Date.now(),
-        fecha,
-        titulo,
-        tipo,
-        descripcion,
-        horaInicio,
-        horaFin,
+      // Nuevo evento - crear en BD
+      await crearEventoBD({
+        fecha, titulo, tipo, descripcion, horaInicio, horaFin
       });
     }
 
-    await guardarEventosJSON();
     formEvento.reset();
-    mostrarEventos();
-    renderCalendar();
+    await cargarEventosJSON(); // Recargar desde BD
   });
 
+  async function crearEventoBD(datosEvento) {
+    try {
+      const res = await fetch("../date/api_calendario.php?action=crear", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(datosEvento),
+      });
+      const result = await res.json();
+      if (result.success) {
+        console.log("Evento creado:", result);
+        // Refrescar también el panel flotante si está disponible
+        if (window.refrescarEventosFlotantes) {
+          window.refrescarEventosFlotantes();
+        }
+      } else {
+        alert("Error al crear evento: " + (result.error || "Error desconocido"));
+      }
+    } catch (err) {
+      console.error("Error creando evento:", err);
+      alert("Error al crear evento");
+    }
+  }
+
+  async function actualizarEventoBD(id, datosEvento) {
+    try {
+      const res = await fetch("../date/api_calendario.php?action=actualizar", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...datosEvento }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        console.log("Evento actualizado:", result);
+        // Refrescar también el panel flotante si está disponible
+        if (window.refrescarEventosFlotantes) {
+          window.refrescarEventosFlotantes();
+        }
+      } else {
+        alert("Error al actualizar evento: " + (result.error || "Error desconocido"));
+      }
+    } catch (err) {
+      console.error("Error actualizando evento:", err);
+      alert("Error al actualizar evento");
+    }
+  }
+
   async function eliminarEvento(id) {
-    eventos = eventos.filter((e) => e.id !== id);
-    await guardarEventosJSON();
-    mostrarEventos();
-    renderCalendar();
+    try {
+      const res = await fetch("../date/api_calendario.php?action=eliminar", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        console.log("Evento eliminado:", result);
+        await cargarEventosJSON(); // Recargar desde BD
+        // Refrescar también el panel flotante si está disponible
+        if (window.refrescarEventosFlotantes) {
+          window.refrescarEventosFlotantes();
+        }
+      } else {
+        alert("Error al eliminar evento: " + (result.error || "Error desconocido"));
+      }
+    } catch (err) {
+      console.error("Error eliminando evento:", err);
+      alert("Error al eliminar evento");
+    }
   }
 
   function editarEvento(id) {
@@ -228,14 +282,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ===============================
-  // JSON (CARGAR / GUARDAR)
+  // API (CARGAR / GUARDAR) - Conecta a BD via api_calendario.php
   // ===============================
-  async function cargarEventosJSON() {
+  async function cargarEventosJSON(mine = false) {
     try {
-      const res = await fetch("../date/calendario.php");
-      if (!res.ok) throw new Error("Error al cargar calendario.json");
+      const url = `../date/api_calendario.php?action=obtener&orden=ASC${mine ? '&mine=1' : ''}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Error al cargar eventos de la BD");
       eventos = await res.json();
-      eliminarEventosPasados();
+      // Si solicitamos solo los eventos del autor (mine=true), no eliminamos eventos pasados
+      if (!mine) {
+        eliminarEventosPasados();
+      } else {
+        console.log('[calendario] cargando eventos del autor, mostrando también pasados. count=', eventos.length);
+      }
       mostrarEventos();
       renderCalendar();
     } catch (err) {
@@ -244,11 +304,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function guardarEventosJSON() {
-    await fetch("../date/calendario.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(eventos),
-    });
+    // Ahora simplemente se guarda en la BD mediante las funciones crear/actualizar/eliminar
+    // Esta función ya no es necesaria para guardar el array completo
+    // Los cambios se persisten con cada operación CRUD
   }
 
   // ===============================
@@ -262,5 +320,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===============================
   // INICIO
   // ===============================
-  cargarEventosJSON();
+  // Cargar eventos al abrir la página
+  // Si window.calendarioFiltroMio está definido, cargamos solo los eventos del usuario actual
+  const usarFiltroMio = window.calendarioFiltroMio === true;
+  cargarEventosJSON(usarFiltroMio);
+
+  // Exportar función global para que otras vistas (por ejemplo el panel flotante o páginas) puedan forzar recarga
+  window.cargarEventos = (mine = false) => cargarEventosJSON(mine);
+
+  // Si alguien encoló llamadas antes de que existiera la función, las ejecutamos ahora
+  try {
+    if (window._calendario_queue && Array.isArray(window._calendario_queue)) {
+      window._calendario_queue.forEach(m => {
+        try { window.cargarEventos(!!m); } catch(e) { console.warn('Error al procesar cola de cargarEventos:', e); }
+      });
+      window._calendario_queue = [];
+    }
+  } catch(e) {
+    console.warn('Error procesando _calendario_queue:', e);
+  }
+  
+  // También mostrar eventos si la sección ya está visible
+  setTimeout(() => {
+    if (document.getElementById("eventosContainer")) {
+      mostrarEventos();
+    }
+  }, 500);
 });
