@@ -1,5 +1,25 @@
 <?php
 
+/*
+ * php/config.php
+ * ----------------
+ * Archivo de configuración central del proyecto.
+ * - Carga variables desde `php/.env` si existe.
+ * - Define constantes `DB_*` y crea conexiones MySQLi en `$conn` y `$mysqli`.
+ * - Configura manejo de errores y logging para desarrollo.
+ *
+ * Propósito:
+ * Este archivo debe ser la única fuente de verdad para la configuración
+ * de conexión a la base de datos y opciones globales. Otros scripts
+ * deben `require_once __DIR__ . '/php/config.php'` o `require_once __DIR__ . '/../php/config.php'`
+ * según su ubicación para reutilizar la misma conexión y evitar duplicación.
+ *
+ * Excepciones / notas de seguridad:
+ * - En producción desactivar `display_errors` (ponerlo a 0) y asegurar
+ *   que los logs no sean accesibles públicamente.
+ * - Evitar usar `root` con contraseña vacía en producción.
+ */
+
 // --- CARGAR VARIABLES DE ENTORNO (.env) si existen ---
 $envFile = __DIR__ . '/.env';
 if (file_exists($envFile)) {
