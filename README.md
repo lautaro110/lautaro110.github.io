@@ -160,11 +160,20 @@ v<br>
 <li class="has-line-data" data-line-start="215" data-line-end="217">Configuraciones Adicionales</li>
 </ol>
 <p class="has-line-data" data-line-start="217" data-line-end="218">Cómo cambiar el Email del Administrador (Formulario de Contacto)</p>
-<p class="has-line-data" data-line-start="219" data-line-end="220">Tu proyecto usa PHP para enviar emails desde el formulario de contacto (confirmado, está en la carpeta API/ y usa PHPMailer).</p>
-<p class="has-line-data" data-line-start="221" data-line-end="222">Si quieres cambiar la dirección de email que recibe los mensajes (es decir, el email del administrador):</p>
-<p class="has-line-data" data-line-start="223" data-line-end="224">Ve a la carpeta API/ y abre el archivo enviar_correo.php (o el archivo principal de envío de emails).</p>
-<p class="has-line-data" data-line-start="225" data-line-end="226">Dentro de ese archivo, busca una línea de código parecida a esta:</p>
-<p class="has-line-data" data-line-start="227" data-line-end="229">// Esta línea le dice a quién enviarle el correo<br>
-$mail-&gt;addAddress(‘correo-del-admin@ejemplo.com’, ‘Nombre Admin’);</p>
-<p class="has-line-data" data-line-start="231" data-line-end="232">Cambia <a href="mailto:correo-del-admin@ejemplo.com">correo-del-admin@ejemplo.com</a> por la nueva dirección de email a la que quieres que lleguen los mensajes.</p>
-<p class="has-line-data" data-line-start="233" data-line-end="234">Importante sobre la cuenta de GMAIL que ENVÍA: Si quieres cambiar la cuenta de Gmail que envía el correo (la que se autentica), es probable que necesites generar una “Contraseña de aplicación” en la configuración de seguridad de esa cuenta de Google, especialmente si tiene la “verificación en dos pasos” activada. Esa contraseña especial es la que se usa en el archivo PHP, no tu contraseña normal de Gmail.</p>
+<p class="has-line-data" data-line-start="219" data-line-end="220">¡Gracias por la corrección! Tu proyecto está configurado de manera profesional usando un archivo .env para manejar las configuraciones y contraseñas (como la que viste, GMAIL_PASS).</p>
+<p class="has-line-data" data-line-start="221" data-line-end="222">Esto es mucho mejor, ya que no necesitas editar el código PHP (en la carpeta php/) para cambiar el destinatario.</p>
+<p class="has-line-data" data-line-start="223" data-line-end="224">Para cambiar el email que recibe los mensajes del administrador:</p>
+<p class="has-line-data" data-line-start="225" data-line-end="226">Ve a la carpeta php/. Dentro de esa carpeta, busca y abre el archivo llamado .env (puede estar oculto en tu sistema).</p>
+<p class="has-line-data" data-line-start="227" data-line-end="228">Verás el contenido que me mostraste. Edita la línea ADMIN_EMAIL:</p>
+<h1 class="code-line" data-line-start=229 data-line-end=230 ><a id="Este_es_el_email_que_ENVA_los_correos_la_cuenta_de_Google_229"></a>Este es el email que ENVÍA los correos (la cuenta de Google)</h1>
+<p class="has-line-data" data-line-start="230" data-line-end="231"><a href="mailto:GMAIL_USER=lebelawsky@eest5.com">GMAIL_USER=lebelawsky@eest5.com</a></p>
+<h1 class="code-line" data-line-start=231 data-line-end=232 ><a id="Esta_es_la_Contrasea_de_Aplicacin_de_16_dgitos_de_esa_cuenta_231"></a>Esta es la “Contraseña de Aplicación” de 16 dígitos de esa cuenta</h1>
+<p class="has-line-data" data-line-start="232" data-line-end="234">GMAIL_PASS=jxewjvomopqnidap<br>
+GMAIL_NAME=Web Escuela Técnica</p>
+<h1 class="code-line" data-line-start=235 data-line-end=236 ><a id="ESTA_ES_LA_LNEA_QUE_BUSCAS_235"></a>¡ESTA ES LA LÍNEA QUE BUSCAS!</h1>
+<h1 class="code-line" data-line-start=236 data-line-end=237 ><a id="Cambia_este_email_por_el_nuevo_email_que_recibir_los_mensajes_236"></a>Cambia este email por el nuevo email que recibirá los mensajes.</h1>
+<p class="has-line-data" data-line-start="237" data-line-end="239"><a href="mailto:ADMIN_EMAIL=lebelawsky@eest5.com">ADMIN_EMAIL=lebelawsky@eest5.com</a><br>
+ADMIN_NAME=Administrador</p>
+<p class="has-line-data" data-line-start="241" data-line-end="242">Cambia <a href="mailto:lebelawsky@eest5.com">lebelawsky@eest5.com</a> en la línea ADMIN_EMAIL por la nueva dirección de email a la que quieres que lleguen los mensajes.</p>
+<p class="has-line-data" data-line-start="243" data-line-end="244">¡Guarda el archivo y listo! El archivo PHP leerá esta configuración automáticamente.</p>
+<p class="has-line-data" data-line-start="245" data-line-end="246">Nota sobre GMAIL_PASS: Como bien viste, GMAIL_PASS es la “Contraseña de Aplicación” de 16 dígitos. Si alguna vez cambias la cuenta de GMAIL_USER, tendrás que generar una nueva “Contraseña de aplicación” desde la configuración de seguridad de esa cuenta de Google.</p>
